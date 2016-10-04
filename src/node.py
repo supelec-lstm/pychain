@@ -17,10 +17,14 @@ class Node:
 		self.dJdx = []
 
 	def evaluate(self):
+		raise NotImplementedError()
 
+	def get_gradient(self, i_child):
+
+		raise NotImplementedError()
 
 	def add_child(self, parent, i):
-		"""add a child to the list, along with the indice the parent have in the child referential."""
+		"""add a child to the list, along with the indice the parent has in the child referential."""
 
 		self.children.append((parent,i))
 
@@ -32,4 +36,3 @@ class Node:
 		self.dJdx = []
 
 
-	
