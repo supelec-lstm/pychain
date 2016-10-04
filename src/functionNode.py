@@ -3,6 +3,16 @@ from node import *
 class FunctionNode(Node):
     """A node which applies an activation function"""
 
+    def get_gradient(self, i_child):
+        if self.dJdx:
+            return self.dJdx
+        gradchildren = np.zeros(self.children[0].get_gradient().shape)
+        for child in self.children:
+            gradchildren = gradchildren + child.get_gradient()
+        gradient = gradchildren*self.gradient_f(self.parents[0].evaluate())
+        self.dJdx.append(gradient)
+        return self.dJdx
+
     def evaluate(self):
         """Evaluate the output of the neuron with the f function implemented in the sub-classes"""
 
@@ -19,6 +29,10 @@ class FunctionNode(Node):
         """Return gradient of the activation function, also implemented in the sub-classes"""
 
         raise NotImplementedError()
+
+
+
+
 
 
 class SigmoidNode(FunctionNode):
@@ -66,7 +80,7 @@ class SoftMaxNode(FunctionNode):
         jacob = np.zeros((len(x),len(x)))
         for i in range(len(x)):
             for j in range(i,len(x)):
-                if(i != j):
+                if i  != j:
                     jacob[j][i], jacob[i][j] = (-a*b for a,b in zip(self.f(x[i]),self.f(x[j])))
                 else:
                     jacob[j][i], jacob[i][j] = ((1-a )* b for a, b in zip(self.f(x[i]), self.f(x[i])))

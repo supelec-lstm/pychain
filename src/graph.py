@@ -16,8 +16,8 @@ class Graph:
         """Propagate the inputs in the entire graph and return the output."""
         
         self.reset_memoization()
-        input_node.set_value(x)
-        return output_node.evaluate() 
+        self.input_node.set_value(x)
+        return self.output_node.evaluate()
 
     def backpropagate(self, x, y):
         """Backpropagate the gradient through the graph,
