@@ -127,3 +127,67 @@ class Norm2Node(FunctionNode):
 
 	def f(self,x):
 		return np
+
+class BinaryOpNode(Node):
+    """These nodes are used for the different operations"""
+
+    def __init__(self, parent1, parent2):
+ 
+        self.parent1 = parent1
+ 
+        self.parent2 = parent2
+  
+    def evaluate(self):
+ 
+        raise NotImplementedError()
+ 
+        
+ 
+        
+ 
+class AdditionNode(BinaryOpNode):
+ 
+    def evaluate(self):
+ 
+        if not self.y:
+ 
+            self.y = self.parent1.evaluate() + self.parent2.evaluate()
+ 
+        return self.y
+ 
+        
+class SubstractionNode(BinaryOpNode):
+ 
+    def evaluate(self):
+ 
+        if not self.y:
+ 
+            self.y = self.parent1.evaluate() - self.parent2.evaluate()
+ 
+        return self.y
+
+
+ class MultiplicationNode(BinaryOpNode):
+ 
+    def evaluate(self):
+ 
+        """multpiplication with matrix, parent1*parent2"""
+ 
+        if not self.y:
+ 
+            self.y = np.dot(self.parent1.evaluate(), self.parent2.evaluate())
+ 
+        return self.y
+ 
+        
+ 
+class SoftmaxCrossEntropyNode(BinaryOpNode):
+ 
+    pass
+ 
+
+ 
+class SigmoidCrossEnropyNode(BinaryOpNode):
+ 
+    pass
+ 
