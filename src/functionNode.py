@@ -3,11 +3,6 @@ from node import *
 class FunctionNode(Node):
     """A node which applies an activation function"""
 
-    def __init__(self, parent):
-        """Parent is a Node"""
-
-        self.parent = parent
-
     def evaluate(self):
         """Evaluate the output of the neuron with the f function implemented in the sub-classes"""
 
@@ -64,7 +59,7 @@ class SoftMaxNode(FunctionNode):
         list = []
         total = np.sum(np.exp(x))
         for i in range(len(x)):
-            np.append(list,(np.exp(x[i]) / total)
+            np.append(list,(np.exp(x[i]) / total))
         return list
 
     def gradient_f(self, x):
