@@ -1,29 +1,33 @@
 from node import *
 
 class FunctionNode(Node):
-    """A node which apply an activation function"""
+    """A node which applies an activation function"""
 
     def __init__(self, parent):
-        """parent is a Node"""
+        """Parent is a Node"""
 
         self.parent = parent
 
-        def evaluate(self):
-            if not self.y:
-                self.y = self.f(self.parents[0].evaluate())
-            return self.y
+    def evaluate(self):
+        """Evaluate the output of the neuron with the f function implemented in the sub-classes"""
+
+        if not self.y:
+            self.y = self.f(self.parents[0].evaluate())
+        return self.y
 
     def f(self,x):
-        """apply the activation function
-        the function is defined in the sub-classes"""
+        """Apply the activation function, defined for each sub-classes"""
 
         raise NotImplementedError()
 
     def gradient_f(self,x):
+        """Return gradient of the activation function, also implemented in the sub-classes"""
+
         raise NotImplementedError()
 
 
 class SigmoidNode(FunctionNode):
+    """The sigmoid function node"""
 
     def f(self, x):
         return 1 / (1 + np.exp(x))
@@ -34,6 +38,7 @@ class SigmoidNode(FunctionNode):
 
 
 class TanhNode(FunctionNode):
+    """The thanh function node"""
 
     def f(self, x):
         return np.tanh(x)
@@ -43,6 +48,7 @@ class TanhNode(FunctionNode):
 
 
 class ReluNode(FunctionNode):
+    """The rectified linear unit node"""
 
     def f(self, x):
         return x if x > 0 else 0
@@ -52,6 +58,7 @@ class ReluNode(FunctionNode):
 
 
 class SoftMaxNode(FunctionNode):
+    """The softmax function node"""
 
     def f(self, x):
         list = []
@@ -70,6 +77,8 @@ class SoftMaxNode(FunctionNode):
 
 class Norm2Node(FunctionNode):
 
+    """The norm two function node"""
+
     def f(self, x):
         return np.linalg.norm(x)
 
@@ -77,6 +86,8 @@ class Norm2Node(FunctionNode):
         return 2*x
 
 class ScalarMultiplicationNode(FunctionNode):
+
+    """The scalar multiplication node, needed for balancing some weights"""
 
     def __init__(self,parent,scalar):
 
