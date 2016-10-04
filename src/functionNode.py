@@ -25,7 +25,7 @@ class SigmoidNode(FunctionNode):
     """The sigmoid function node"""
 
     def f(self, x):
-        return 1 / (1 + np.exp(x))
+        return 1 / (1 + np.exp(-x))
 
 
     def gradient_f(self, x):
@@ -66,7 +66,10 @@ class SoftMaxNode(FunctionNode):
         jacob = np.zeros((len(x),len(x)))
         for i in range(len(x)):
             for j in range(i,len(x)):
-                jacob[j][i], jacob[i][j] = (-a*b for a,b in zip(self.f(x[i]),self.f(x[j])))
+                if(i != j):
+                    jacob[j][i], jacob[i][j] = (-a*b for a,b in zip(self.f(x[i]),self.f(x[j])))
+                else:
+                    jacob[j][i], jacob[i][j] = ((1-a )* b for a, b in zip(self.f(x[i]), self.f(x[i])))
         return jacob
 
 
