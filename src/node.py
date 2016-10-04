@@ -14,7 +14,8 @@ class Node:
 		#memoization variables
 		self.x = None
 		self.y = None
-		self.dJdx = []
+		self.dJdx = None
+      
 
 	def evaluate(self):
 		raise NotImplementedError()
@@ -33,7 +34,8 @@ class Node:
 
 		self.x = None
 		self.y = None
-		self.dJdx = []
+		self.dJdx = None
+          
 
 
 
@@ -47,15 +49,37 @@ class InputNode(Node):
      def set_value(self, value):
          self.value = value
          
+     def evaluate(self):
+         return self.value
+         
         
 class LearnableNode(Node):
     """A node which contains the parameters we want to evaluate"""
     
-    def __init__(shape, init_function):
-        self.w = 
+    def __init__(self, shape, init_function = None):
+        if not init_function:
+            i,j = shape
+            self.w = np.random.randn(i,j)
+        else:
+            self.w = init_function(shape)
+        self.acc_dJdw = np.zeros([i,j])
         
-    def descend_gradient(learning_rate, batch_size):
-        self.w = self.w - (learning_rate/batch_size)*self.acc_dJdw
+    def descend_gradient(self, learning_rate, batch_size):
+        self.w = self.w - (learning_rate/batch_size) * self.acc_dJdw
+        self.acc_dJdw = np.zeros(self.w.shape)
+        
+    def evaluate(self):
+        return self.w
+        
+    def get_gradient(self):
+        if self.dJdx:
+            return self.dJdx
+        gradchildren = np.zeros(self.children[0].get_gradient().shape)
+        for child in self.children:
+            gradchildren = gradchildren + child.get_gradient()
+        self.dJdx.append(gradchildren)
+        self.acc_dJdw+=self.dJdw
+        return self.dJdx
         
 
 
@@ -63,63 +87,79 @@ class LearnableNode(Node):
 class BinaryOpNode(Node):
     """These nodes are used for the different operations"""
 
-    def __init__(self, parent1, parent2):
- 
-        self.parent1 = parent1
- 
+    def __init__(self, parent1, parent2): 
+        self.parent1 = parent1 
         self.parent2 = parent2
   
     def evaluate(self):
- 
+        raise NotImplementedError()
+        
+    def get_gradient(self):
         raise NotImplementedError()
  
         
- 
-        
- 
 class AdditionNode(BinaryOpNode):
- 
-    def evaluate(self):
- 
-        if not self.y:
- 
-            self.y = self.parent1.evaluate() + self.parent2.evaluate()
- 
+    
+    def evaluate(self): 
+        if not self.y: 
+            self.y = self.parent1.evaluate() + self.parent2.evaluate() 
         return self.y
+        
+    def get_gradient(self):
+        if self.dJdx:
+            return self.dJdx
+        gradchildren = np.zeros(self.children[0].get_gradient().shape)
+        for child in self.children:
+            gradchildren = gradchildren + child.get_gradient()
+        self.dJdx.append(gradchildren)
+        self.dJdx.append(gradchildren)
+        return self.dJdx
  
         
 class SubstractionNode(BinaryOpNode):
  
     def evaluate(self):
- 
         if not self.y:
- 
             self.y = self.parent1.evaluate() - self.parent2.evaluate()
- 
         return self.y
+        
+    def get_gradient(self):
+        if self.dJdx:
+            return self.dJdx
+        gradchildren = np.zeros(self.children[0].get_gradient().shape)
+        for child in self.children:
+            gradchildren = gradchildren + child.get_gradient()
+        self.dJdx.append(gradchildren)
+        self.dJdx.append(-gradchildren)
+        return self.dJdx
 
 
- class MultiplicationNode(BinaryOpNode):
+class MultiplicationNode(BinaryOpNode):
  
-    def evaluate(self):
- 
-        """multpiplication with matrix, parent1*parent2"""
- 
-        if not self.y:
- 
-            self.y = np.dot(self.parent1.evaluate(), self.parent2.evaluate())
- 
+    def evaluate(self): 
+        """multpiplication with matrix, parent1*parent2""" 
+        if not self.y: 
+            self.y = np.dot(self.parent1.evaluate(), self.parent2.evaluate()) 
         return self.y
+        
+    def get_gradient(self):
+        if self.dJdx:
+            return self.dJdx
+        gradchildren = np.zeros(self.children[0].get_gradient().shape)
+        for child in self.children:
+            gradchildren = gradchildren + child.get_gradient()
+        self.dJdx.append(gradchildren*self.parent2.evaluate())
+        self.dJdx.append(gradchildren*self.parent1.evaluate())
+        return self.dJdx
  
+         
+class SoftmaxCrossEntropyNode(BinaryOpNode): 
+    
+    pass
         
  
-class SoftmaxCrossEntropyNode(BinaryOpNode):
- 
-    pass
- 
 
  
-class SigmoidCrossEnropyNode(BinaryOpNode):
- 
+class SigmoidCrossEnropyNode(BinaryOpNode): 
     pass
  
