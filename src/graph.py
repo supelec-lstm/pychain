@@ -1,4 +1,4 @@
-from neuron import *
+from node import *
 from functionNode import *
 
 class Graph:

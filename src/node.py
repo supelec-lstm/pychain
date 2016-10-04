@@ -1,40 +1,40 @@
 import numpy as np
 
 class Node:
-	"""Create a node associated with an elementary operation and capable of backpropagation."""
+    """Create a node associated with an elementary operation and capable of backpropagation."""
 
-	def __init__(self, parents = []):
+    def __init__(self, parents = []):
 
-		self.parents = parents
-		self.children = []
+        self.parents = parents
+        self.children = []
 
-		for i,parent in enumerate(parents):
-			parent.add_child(parent, i) 
+        for i,parent in enumerate(parents):
+            parent.add_child(parent, i) 
 
-		#memoization variables
-		self.x = None
-		self.y = None
-		self.dJdx = None
+        #memoization variables
+        self.x = None
+        self.y = None
+        self.dJdx = None
       
 
-	def evaluate(self):
-		raise NotImplementedError()
+    def evaluate(self):
+        raise NotImplementedError()
 
-	def get_gradient(self, i_child):
+    def get_gradient(self, i_child):
 
-		raise NotImplementedError()
+        raise NotImplementedError()
 
-	def add_child(self, parent, i):
-		"""Add a child to the list, along with the indice the parent has in the child referential."""
+    def add_child(self, parent, i):
+        """Add a child to the list, along with the indice the parent has in the child referential."""
 
-		self.children.append((parent,i))
+        self.children.append((parent,i))
 
-	def reset_memoization(self):
-		"""Reset all memoization variables"""
+    def reset_memoization(self):
+        """Reset all memoization variables"""
 
-		self.x = None
-		self.y = None
-		self.dJdx = []
+        self.x = None
+        self.y = None
+        self.dJdx = []
           
 
 
@@ -67,7 +67,7 @@ class LearnableNode(Node):
         self.children = []
         
     def descend_gradient(self, learning_rate, batch_size):
-    	"""descend the gradient and reset the accumulator"""
+        """descend the gradient and reset the accumulator"""
 
         self.w = self.w - (learning_rate/batch_size) * self.acc_dJdw
         self.acc_dJdw = np.zeros(self.w.shape)
@@ -158,9 +158,9 @@ class MultiplicationNode(BinaryOpNode):
         return self.dJdx
 
 class ConstantGradientNode(Node):
-	
-	def get_gradient(self):
-		return 1
+    
+    def get_gradient(self):
+        return 1
          
 class SoftmaxCrossEntropyNode(BinaryOpNode): 
     
