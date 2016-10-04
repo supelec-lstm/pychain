@@ -47,15 +47,23 @@ class InputNode(Node):
      def set_value(self, value):
          self.value = value
          
+     def evaluate(self):
+         return self.value
+
+    
+         
         
 class LearnableNode(Node):
     """A node which contains the parameters we want to evaluate"""
     
-    def __init__(shape, init_function):
-        self.w = 
+    def __init__(self, shape, init_function):
+        self.w = np.random.randn(shape)
         
-    def descend_gradient(learning_rate, batch_size):
+    def descend_gradient(self, learning_rate, batch_size):
         self.w = self.w - (learning_rate/batch_size)*self.acc_dJdw
+        
+    def evaluate(self):
+        return self.w
         
     
     
@@ -81,9 +89,9 @@ class FunctionNode(Node):
 class SigmoidNode(FunctionNode):
     
     def f():
-        return f(self.parent.evaluate())
+        return f(self.parent.y)
         
     def gradient_f():
-        return f(self.parent.evaluate())*(1-self.parent.evaluate())
+        return f(self.parent.y)*(1-self.parent.y)
         
     
