@@ -2,10 +2,22 @@
 class Graph:
     """Create a graph from a set of nodes"""
     def __init__(self,nodes):
-        pass
+        
+        self.nodes = nodes
+        input_node = 
+        output_node = 
+        expected_output = 
+        cost_node =
+        learnable_nodes = 
+
+
 
     def propagate(self,x):
-        pass
+        """Propagate the inputs in the entire graph and return the output."""
+
+        input_node.set_value(x)
+        cost_node.evaluate()
+        return output_node.evaluate() 
 
     def backpropagate(self,x,y):
         pass
@@ -20,7 +32,14 @@ class Graph:
         pass
 
     def reset_memoization(self):
-        pass
+        """Reset the memoization variables in all the nodes"""
+
+        for node in nodes:
+            node.reset_memoization()
 
     def reset_accumulators(self):
-        pass
+        """Reset the accumulator variables in all the learnable nodes"""
+
+        for learnable_node in learnable_nodes:
+            learnable_node.reset_accumulator()
+            
