@@ -60,7 +60,7 @@ class LearnableNode(Node):
     def __init__(self, shape, init_function = None):
         if not init_function:
             i,j = shape
-            self.w = np.random.randn(i,j)
+            self.w = np.random.randn(i,j)*2-np.ones((i,j))
         else:
             self.w = init_function(shape)
         self.acc_dJdw = np.zeros([i,j])
@@ -156,7 +156,11 @@ class MultiplicationNode(BinaryOpNode):
         self.dJdx.append(gradchildren*self.parent2.evaluate())
         self.dJdx.append(gradchildren*self.parent1.evaluate())
         return self.dJdx
- 
+
+class ConstantGradientNode(Node):
+	
+	def get_gradient(self):
+		return 1
          
 class SoftmaxCrossEntropyNode(BinaryOpNode): 
     
