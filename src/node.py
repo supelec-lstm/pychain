@@ -47,17 +47,26 @@ class InputNode(Node):
      def set_value(self, value):
          self.value = value
          
+     def evaluate(self):
+         return self.value
+
+    
+         
         
 class LearnableNode(Node):
     """A node which contains the parameters we want to evaluate"""
     
-    def __init__(shape, init_function):
-        self.w = 
+    def __init__(self, shape, init_function):
+        self.w = np.random.randn(shape)
         
-    def descend_gradient(learning_rate, batch_size):
+    def descend_gradient(self, learning_rate, batch_size):
         self.w = self.w - (learning_rate/batch_size)*self.acc_dJdw
         
-
+    def evaluate(self):
+        return self.w
+        
+    
+    
 class FunctionNode(Node):
     """A node which apply an activation function"""
     
@@ -91,39 +100,42 @@ class SigmoidNode(FunctionNode):
     def gradient_f(self,x):
         return self.f(x)*(1-self.f(x))
         
+class BinaryOpNode(Node):
+    """These nodes are used for the different operations"""
+    
+    def __init__(self, parent1, parent2):
+        self.parent1 = parent1
+        self.parent2 = parent2
+        
+    def evaluate(self):
+        raise NotImplementedError()
+        
+        
+class AdditionNode(BinaryOpNode):
+    
+    def evaluate(self):
+        if not self.y:
+            self.y = self.parent1.evaluate() + self.parent2.evaluate()
+        return self.y
+        
+class SubstractionNode(BinaryOpNode):
+    
+    def evaluate(self):
+        if not self.y:
+            self.y = self.parent1.evaluate() - self.parent2.evaluate()
+        return self.y
+        
+class MultiplicationNode(BinaryOpNode):
+    
+    def evaluate(self):
+        """multpiplication with matrix, parent1*parent2"""
+        if not self.y:
+            self.y = np.dot(self.parent1.evaluate(), self.parent2.evaluate())
+        return self.y
+        
+class SoftmaxCrossEntropyNode(BinaryOpNode):
+    pass
 
-class TanhNode(FunctionNode):
-
-	def f(self,x):
-		return np.tanh(x)
-
-	def gradient_f(self,x):
-		return 1/(1+x**2)
-
-class ReluNode(FunctionNode):
-
-	def f(self,x):
-		return x if x>0 else 0
-
-	def gradient_f(self,x):
-		return 1 if x>0 else 0
-
-class SoftMaxNode(FunctionNode):
-
-	def f(self,x):
-		liste = []
-		total = np.sum(np.exp(x))
-		for i in range(len(x)):
-			liste[i] = np.exp(x[i])/total
-		return total
-
-	def gradient_f(self,x):
-		pass
-
-class Norm2Node(FunctionNode):
-
-	def f(self,x):
-		return np.linalg.norm(x)
-
-	def f(self,x):
-		return np
+class SigmoidCrossEnropyNode(BinaryOpNode):
+    pass
+        
