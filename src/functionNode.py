@@ -8,7 +8,7 @@ class FunctionNode(Node):
             return self.dJdx
         gradchildren = np.zeros(self.children[0].get_gradient().shape)
         for child in self.children:
-            gradchildren = gradchildren + child.get_gradient()
+            gradchildren += child.get_gradient()
         gradient = gradchildren*self.gradient_f(self.parents[0].evaluate())
         self.dJdx.append(gradient)
         return self.dJdx

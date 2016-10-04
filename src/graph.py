@@ -1,3 +1,6 @@
+from neuron import *
+from functionNode import *
+
 class Graph:
     """Create a graph from a set of nodes"""
     
