@@ -25,7 +25,7 @@ class Node:
 		raise NotImplementedError()
 
 	def add_child(self, parent, i):
-		"""add a child to the list, along with the indice the parent has in the child referential."""
+		"""Add a child to the list, along with the indice the parent has in the child referential."""
 
 		self.children.append((parent,i))
 
@@ -45,6 +45,7 @@ class InputNode(Node):
      
      def __init__(self, value = None):
          self.value = value
+         self.children = []
          
      def set_value(self, value):
          self.value = value
@@ -63,6 +64,7 @@ class LearnableNode(Node):
         else:
             self.w = init_function(shape)
         self.acc_dJdw = np.zeros([i,j])
+        self.children = []
         
     def descend_gradient(self, learning_rate, batch_size):
         self.w = self.w - (learning_rate/batch_size) * self.acc_dJdw
@@ -90,6 +92,7 @@ class BinaryOpNode(Node):
     def __init__(self, parent1, parent2): 
         self.parent1 = parent1 
         self.parent2 = parent2
+        self.children = []
   
     def evaluate(self):
         raise NotImplementedError()
@@ -137,7 +140,7 @@ class SubstractionNode(BinaryOpNode):
 class MultiplicationNode(BinaryOpNode):
  
     def evaluate(self): 
-        """multpiplication with matrix, parent1*parent2""" 
+        """Multpiplication with matrix, parent1*parent2""" 
         if not self.y: 
             self.y = np.dot(self.parent1.evaluate(), self.parent2.evaluate()) 
         return self.y
