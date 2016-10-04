@@ -24,15 +24,17 @@ class FunctionNode(Node):
 
 
 class SigmoidNode(FunctionNode):
+
     def f(self, x):
         return 1 / (1 + np.exp(x))
 
 
-def gradient_f(self, x):
-    return self.f(x) * (1 - self.f(x))
+    def gradient_f(self, x):
+        return self.f(x) * (1 - self.f(x))
 
 
 class TanhNode(FunctionNode):
+
     def f(self, x):
         return np.tanh(x)
 
@@ -41,6 +43,7 @@ class TanhNode(FunctionNode):
 
 
 class ReluNode(FunctionNode):
+
     def f(self, x):
         return x if x > 0 else 0
 
@@ -49,20 +52,40 @@ class ReluNode(FunctionNode):
 
 
 class SoftMaxNode(FunctionNode):
+
     def f(self, x):
-        liste = []
+        list = []
         total = np.sum(np.exp(x))
         for i in range(len(x)):
-            liste[i] = np.exp(x[i]) / total
-        return total
+            np.append(list,(np.exp(x[i]) / total)
+        return list
 
     def gradient_f(self, x):
-        pass
+        jacob = np.zeros((len(x),len(x)))
+        for i in range(len(x)):
+            for j in range(i,len(x)):
+                jacob[j][i], jacob[i][j] = (-a*b for a,b in zip(self.f(x[i]),self.f(x[j])))
+        return jacob
 
 
 class Norm2Node(FunctionNode):
+
     def f(self, x):
         return np.linalg.norm(x)
 
-    def f(self, x):
-        return np
+    def gradient_f(self, x):
+        return 2*x
+
+class ScalarMultiplicationNode(FunctionNode):
+
+    def __init__(self,parent,scalar):
+
+        FunctionNode.__init__(self,parent)
+        self.scalar = scalar
+
+
+    def f(self,x):
+        return self.scalar*x
+
+    def gradient_f(self,x):
+        return self.scalar
