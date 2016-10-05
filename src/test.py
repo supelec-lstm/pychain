@@ -1,13 +1,13 @@
 from node import *
 from graph import *
 from functionNode import *
+from random import *
 
+input_nod = InputNode()
 
-input_node = InputNode(np.array([[0],[1]]))
+w1 = LearnableNode((4,1))
 
-w1 = LearnableNode((2,2))
-
-h1 = MultiplicationNode([w1, input_node])
+h1 = MultiplicationNode([w1, input_nod])
 
 s1 = SigmoidNode([h1])
 
@@ -19,10 +19,17 @@ e1 = Norm2Node([d1])
 
 c1 = ConstantGradientNode([e1])
 
-graph = Graph([input_node, w1, h1, s1, expected_output, d1, e1, c1], input_node, s1, expected_output, c1, [w1])
+graph = Graph([input_nod, w1, h1, s1, expected_output, d1, e1, c1], input_nod, s1, expected_output, c1, [w1])
 
-for i in range(1000):
+print(graph.propagate(np.array([1,1,1,1])))
 
-    graph.batch_descent_gradient(0.1,[np.array([[0],[0]]),np.array([[0],[1]]),np.array([[1],[0]]),np.array([[1],[1]])],[np.array([0]),np.array([1]),np.array([1]),np.array([1])])
+batch = np.array([np.array([np.array([0,0,1,1]), np.array([0])]), np.array([np.array([0,1,1,1]), np.array([1])]), np.array([np.array([1,0,1,1]), np.array([1])]), np.array([np.array([1,1,1,1]), np.array([0])])])
 
+X=[]
+Y=[]
+for i in range(10000):
+	n = randint(0,3)
+	X.append(batch[n][0])
+	Y.append(batch[n][1])
 
+print(graph.batch_descent_gradient(0.3,X,Y))

@@ -19,8 +19,7 @@ class Graph:
         """Propagate the inputs in the entire graph and return the output."""
         
         self.reset_memoization()
-        if x != None:
-            self.input_node.set_value(x)
+        self.input_node.set_value(x)
         return self.output_node.evaluate()
 
     def backpropagate(self, x = None, y = None):
@@ -28,8 +27,7 @@ class Graph:
             Return the cost."""
 
         self.propagate(x)
-        if not y:
-            self.expected_output.set_value(y)                       #what if we put a matrix as input? will we take care of the gradient for the whole matrix or should we split the matrix and do it by line?
+        self.expected_output.set_value(y)                       #what if we put a matrix as input? will we take care of the gradient for the whole matrix or should we split the matrix and do it by line?
         self.cost_node.evaluate()
         for learnable_node in self.learnable_nodes:
             learnable_node.get_gradient()
@@ -62,7 +60,6 @@ class Graph:
 
     def reset_memoization(self):
         """Reset the memoization variables in all the nodes."""
-
         for node in self.nodes:
             node.reset_memoization()
 

@@ -41,19 +41,20 @@ class Node:
 
 
 class InputNode(Node):
-     """Create the nodes for the inputs of the graph"""
+    """Create the nodes for the inputs of the graph"""
      
-     def __init__(self, value = None):
-
-         self.value = value
-         self.children = []
+    def __init__(self, value = None):
+        self.value = value
+        self.children = []
          
-     def set_value(self, value):
-         self.value = value
+    def set_value(self, value):
+        self.value = value
+        print(self.value)
          
-     def evaluate(self):
-         return self.value
-         
+    def evaluate(self):
+        print(self)
+        return self.value
+        
         
 class LearnableNode(Node):
     """A node which contains the parameters we want to evaluate"""
@@ -74,7 +75,9 @@ class LearnableNode(Node):
         self.acc_dJdw = np.zeros(self.w.shape)
         
     def evaluate(self):
+        print(self)
         return self.w
+
         
     def get_gradient(self):
         if self.dJdx:
@@ -102,6 +105,7 @@ class BinaryOpNode(Node):
 class AdditionNode(BinaryOpNode):
     
     def evaluate(self): 
+        print(self)
         if not self.y: 
             self.y = self.parents[0].evaluate() + self.parents[1].evaluate()
         return self.y
@@ -120,6 +124,7 @@ class AdditionNode(BinaryOpNode):
 class SubstractionNode(BinaryOpNode):
  
     def evaluate(self):
+        print(self)
         if self.y == None:
             self.y = self.parents[0].evaluate() - self.parents[1].evaluate()
         return self.y
@@ -139,8 +144,10 @@ class MultiplicationNode(BinaryOpNode):
  
     def evaluate(self): 
         """Multpiplication with matrix, parent1*parent2""" 
+        print(self)
         if not self.y: 
-            self.y = np.dot(self.parents[0].evaluate(), self.parents[1].evaluate())
+            print(self.parents)
+            self.y = np.dot(self.parents[0].evaluate().T, self.parents[1].evaluate())
         return self.y
         
     def get_gradient(self):
@@ -156,6 +163,7 @@ class MultiplicationNode(BinaryOpNode):
 class ConstantGradientNode(Node):
 
     def evaluate(self):
+        print(self)
         if not self.y:
             self.y = self.parents[0].evaluate()
 
