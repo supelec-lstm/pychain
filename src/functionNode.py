@@ -3,12 +3,12 @@ from node import *
 class FunctionNode(Node):
     """A node which applies an activation function"""
 
-    def get_gradient(self, i_child):
+    def get_gradient(self):
         if self.dJdx:
             return self.dJdx
-        gradchildren = np.zeros(self.children[0].get_gradient().shape)
+        gradchildren = np.zeros(self.children[0][0].get_gradient().shape)
         for child in self.children:
-            gradchildren += child.get_gradient()
+            gradchildren += child[0].get_gradient()
         gradient = gradchildren*self.gradient_f(self.parents[0].evaluate())
         self.dJdx.append(gradient)
         return self.dJdx
@@ -16,7 +16,7 @@ class FunctionNode(Node):
     def evaluate(self):
         """Evaluate the output of the neuron with the f function implemented in the sub-classes"""
 
-        if not self.y:
+        if self.y == None:
             self.y = self.f(self.parents[0].evaluate())
         return self.y
 
