@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 input_nod = InputNode()
 
-w1 = LearnableNode((4,1))
+w1 = LearnableNode((3,2))
 
-w2 = LearnableNode((4,1))
+w2 = LearnableNode((2,1))
 
 h1 = MultiplicationNode([w1, input_nod])
 
@@ -28,9 +28,10 @@ c1 = ConstantGradientNode([e1])
 
 graph = Graph([input_nod, w1, h1, s1, h2, s2, expected_output, d1, e1, c1], input_nod, s2, expected_output, c1, [w1, w2])
 
-print(graph.propagate(np.array([1,1,1,1])))
+print(graph.propagate(np.array([1,1,1])))
+print(graph.learnable_nodes[0])
 
-batch = np.array([[[0,0,1,1],[0]], [[0,1,1,1], [1]], [[1,0,1,1], [1]], [[1,1,1,1], [0]]])
+batch = np.array([[[0,0,1],[0]], [[0,1,1], [1]], [[1,0,1], [1]], [[1,1,1], [0]]])
 
 X=[]
 Y=[]
@@ -39,7 +40,7 @@ for i in range(100000):
 	X.append(batch[n][0])
 	Y.append(batch[n][1])
 
-costs = graph.batch_descent_gradient(1,X,Y)
+costs = graph.batch_descent_gradient(0.01,X,Y)
 
 print(graph.propagate(batch[0][0]))
 print(graph.propagate(batch[1][0]))
@@ -51,14 +52,13 @@ plane = np.zeros((100,100))
 
 for i in range(100):
 	for j in range(100):
-		plane[i][j] = graph.propagate([x[i],x[99-j],1,1])
+		plane[i][j] = graph.propagate([x[i],x[99-j],1])
 
-print(plane)
-
+print(costs[0])
 plt.imshow(plane, origin = 'lower')
 
 plt.show()
 
-plt.plot(costs)
+plt.plot(costs[0:100])
 
 plt.show()
