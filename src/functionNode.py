@@ -4,18 +4,15 @@ import numpy as np
 class FunctionNode(Node):
     """A node which applies an activation function"""
 
-    def get_gradient(self, i_child):
-        if self.dJdx:
-            return self.dJdx
-        i=0
-        parent_indice = self.children[i][1]
-        gradchildren = np.zeros(self.children[0][0].get_gradient(parent_indice).shape)
-        for i in (0, len(self.children)):
-            parent_indice=self.children[i][1]
-            gradchildren = gradchildren + self.children[i][0].get_gradient(parent_indice)
-        gradient = gradchildren*self.gradient_f(self.parents[0].evaluate())
-        self.dJdx.append(gradient)
-        return self.dJdx[i_child]
+    def get_gradient(self):
+        if not self.dJdx:
+            self.dJdx = []
+            gradchildren = np.zeros(self.children[0][0].get_gradient().shape)
+            for child in self.children:
+                gradchildren += child[0].get_gradient()
+            gradient = gradchildren*self.gradient_f(self.parents[0].evaluate())
+            self.dJdx.append(gradient)
+        return self.dJdx
 
     def evaluate(self):
         """Evaluate the output of the neuron with the f function implemented in the sub-classes"""

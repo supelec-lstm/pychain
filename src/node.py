@@ -3,10 +3,10 @@ import numpy as np
 class Node:
     """Create a node associated with an elementary operation and capable of backpropagation."""
 
-    def __init__(self, parents = []):
+    def __init__(self, parents = None):
 
         self.parents = parents
-        self.children = []
+        self.children = None
 
         for i,parent in enumerate(parents):
             parent.add_child(self, i)
@@ -27,6 +27,8 @@ class Node:
     def add_child(self, parent, i):
         """Add a child to the list, along with the indice the parent has in the child referential."""
 
+        if not self.children:
+            self.children = []
         self.children.append((parent,i))
 
     def reset_memoization(self):
@@ -44,8 +46,8 @@ class InputNode(Node):
     """Create the nodes for the inputs of the graph"""
      
     def __init__(self, value = None):
-        self.value = value
-        self.children = []
+        self.value = None
+        self.children = None
          
     def set_value(self, value):
         self.value = value
