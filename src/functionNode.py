@@ -16,7 +16,11 @@ class FunctionNode(Node):
 
     def evaluate(self):
         """Evaluate the output of the neuron with the f function implemented in the sub-classes"""
+<<<<<<< Updated upstream
 
+=======
+        
+>>>>>>> Stashed changes
         if not self.y:
             self.y = self.f(self.parents[0].evaluate())
         return self.y

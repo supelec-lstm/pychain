@@ -67,6 +67,7 @@ class LearnableNode(Node):
             self.w = np.random.randn(i,j)*2-np.ones((i,j))
         else:
             self.w = init_function(shape)
+        self.dJdx = None
         self.acc_dJdw = np.zeros([i,j])
         self.children = []
         self.dJdx = None
@@ -198,4 +199,9 @@ class SoftmaxCrossEntropyNode(BinaryOpNode):
  
 class SigmoidCrossEnropyNode(BinaryOpNode): 
     pass
- 
+
+
+class BiasNode(Node):
+
+    
+

@@ -8,7 +8,11 @@ input_nod = InputNode()
 
 w1 = LearnableNode((3,2))
 
+<<<<<<< Updated upstream
 w2 = LearnableNode((2,1))
+=======
+w2 = LearnableNode((1,1))
+>>>>>>> Stashed changes
 
 h1 = MultiplicationNode([w1, input_nod])
 
