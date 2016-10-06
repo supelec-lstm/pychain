@@ -51,10 +51,10 @@ class InputNode(Node):
          
     def set_value(self, value):
         self.value = value
-        print(self.value)
+        
          
     def evaluate(self):
-        print(self)
+        
         return self.value
         
         
@@ -77,23 +77,22 @@ class LearnableNode(Node):
         self.acc_dJdw = np.zeros(self.w.shape)
         
     def evaluate(self):
-        print(self)
+        
         return self.w
 
         
     def get_gradient(self, i_child = None):
-        if self.dJdx:
-            return self.dJdx
-        self.dJdx=[]
-        i=0
-        parent_indice = self.children[i][1]
-        gradchildren = np.zeros(self.children[0][0].get_gradient(parent_indice).shape)
-        for i in (0, len(self.children)):
+        if self.dJdx != None:
+            self.dJdx=[]
+            i=0
             parent_indice = self.children[i][1]
-            gradchildren = gradchildren + self.children[i][0].get_gradient(parent_indice)
-        self.dJdx.append(gradchildren)
-        self.acc_dJdw+=self.dJdx
-        return self.dJdx
+            gradchildren = np.zeros(self.children[0][0].get_gradient(parent_indice).shape)
+            for i in (0, len(self.children)):
+                parent_indice = self.children[i][1]
+                gradchildren = gradchildren + self.children[i][0].get_gradient(parent_indice)
+            self.dJdx.append(gradchildren)
+            self.acc_dJdw+=self.dJdx
+        return np.array(self.dJdx)[i_child]
         
 
 
@@ -111,7 +110,7 @@ class BinaryOpNode(Node):
 class AdditionNode(BinaryOpNode):
     
     def evaluate(self): 
-        print(self)
+        
         if not self.y: 
             self.y = self.parents[0].evaluate() + self.parents[1].evaluate()
         return self.y
@@ -128,13 +127,13 @@ class AdditionNode(BinaryOpNode):
             gradchildren = gradchildren + self.children[i][0].get_gradient(parent_indice)
         self.dJdx.append(gradchildren) #list of the gradient for the 2 parents
         self.dJdx.append(gradchildren)
-        return self.dJdx[i_child]
+        return np.array(self.dJdx)[i_child]
  
         
 class SubstractionNode(BinaryOpNode):
  
     def evaluate(self):
-        print(self)
+        
         if self.y == None:
             self.y = self.parents[0].evaluate() - self.parents[1].evaluate()
         return self.y
@@ -151,16 +150,15 @@ class SubstractionNode(BinaryOpNode):
             gradchildren = gradchildren + self.children[i][0].get_gradient(parent_indice)
         self.dJdx.append(gradchildren) #list of the gradient for the 2 parents
         self.dJdx.append(-gradchildren)
-        return self.dJdx[i_child]
-
+        return np.array(self.dJdx)[i_child]
 
 class MultiplicationNode(BinaryOpNode):
  
     def evaluate(self): 
         """Multpiplication with matrix, parent1*parent2""" 
-        print(self)
+        
         if not self.y: 
-            print(self.parents)
+            
             self.y = np.dot(self.parents[0].evaluate().T, self.parents[1].evaluate())
         return self.y
         
@@ -176,12 +174,12 @@ class MultiplicationNode(BinaryOpNode):
             gradchildren = gradchildren + self.children[i][0].get_gradient(parent_indice)
         self.dJdx.append(gradchildren * self.children[1][0].evaluate()) #list of the gradient for the 2 parents
         self.dJdx.append(gradchildren * self.children[0][0].evaluate())
-        return self.dJdx[i_child]
+        return np.array(self.dJdx)[i_child]
 
 class ConstantGradientNode(Node):
 
     def evaluate(self):
-        print(self)
+        
         if not self.y:
             self.y = self.parents[0].evaluate()
 

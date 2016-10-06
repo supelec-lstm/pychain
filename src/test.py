@@ -23,7 +23,7 @@ graph = Graph([input_nod, w1, h1, s1, expected_output, d1, e1, c1], input_nod, s
 
 print(graph.propagate(np.array([1,1,1,1])))
 
-batch = np.array([np.array([np.array([0,0,1,1]), np.array([0])]), np.array([np.array([0,1,1,1]), np.array([1])]), np.array([np.array([1,0,1,1]), np.array([1])]), np.array([np.array([1,1,1,1]), np.array([0])])])
+batch = np.array([[[0,0,1,1],[0]], [[0,1,1,1], [1]], [[1,0,1,1], [1]], [[1,1,1,1], [0]]])
 
 X=[]
 Y=[]
@@ -33,3 +33,4 @@ for i in range(10000):
 	Y.append(batch[n][1])
 
 print(graph.batch_descent_gradient(0.3,X,Y))
+
