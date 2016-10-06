@@ -73,7 +73,7 @@ class LearnableNode(Node):
     def descend_gradient(self, learning_rate, batch_size):
         """descend the gradient and reset the accumulator"""
 
-        self.w = self.w - (learning_rate/batch_size) * self.acc_dJdw
+        self.w -= (learning_rate/batch_size) * self.acc_dJdw
         self.acc_dJdw = np.zeros(self.w.shape)
         
     def evaluate(self):
