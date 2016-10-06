@@ -75,7 +75,7 @@ class LearnableNode(Node):
     def descend_gradient(self, learning_rate, batch_size):
         """descend the gradient and reset the accumulator"""
 
-        self.w -= (learning_rate/batch_size) * self.acc_dJdw
+        self.w = self.w - (learning_rate/batch_size) * self.acc_dJdw
         self.acc_dJdw = np.zeros(self.w.shape)
         
     def evaluate(self):
@@ -98,11 +98,11 @@ class LearnableNode(Node):
                 print(self.children[i][0].dJdx)
                 gradchildren = gradchildren + self.children[i][0].get_gradient(parent_indice)
                 print(gradchildren)
-            self.dJdx = np.append(self.dJdx,gradchildren)
+            self.dJdx.append(gradchildren)
             print(self.dJdx)
-            self.acc_dJdw+=self.dJdx
+            self.acc_dJdw+=self.dJdx[0]
         print(self.dJdx)
-        return np.array(self.dJdx)
+        return self.dJdx
         
 
 
@@ -138,7 +138,7 @@ class AdditionNode(BinaryOpNode):
         self.dJdx = np.append(self.dJdx,gradchildren) #list of the gradient for the 2 parents
         self.dJdx = np.append(self.dJdx,gradchildren)
         print(self.dJdx)
-        return np.array(self.dJdx)[i_child]
+        return self.dJdx[i_child]
  
         
 class SubstractionNode(BinaryOpNode):
@@ -161,7 +161,7 @@ class SubstractionNode(BinaryOpNode):
                 gradchildren = gradchildren + self.children[i][0].get_gradient(parent_indice)
                 self.dJdx = np.append(self.dJdx,gradchildren) #list of the gradient for the 2 parents
                 self.dJdx = np.append(self.dJdx,-gradchildren)
-        return np.array(self.dJdx)[i_child]
+        return self.dJdx[i_child]
 
 class MultiplicationNode(BinaryOpNode):
  
@@ -187,10 +187,10 @@ class MultiplicationNode(BinaryOpNode):
             print("azer",gradchildren)
             print(self.parents[1].evaluate())
             #self.dJdx = np.append(self.dJdx,gradchildren * self.parents[1].evaluate().T) #list of the gradient for the 2 parents
-            self.dJdx.append(np.array([np.dot(self.parents[1].evaluate().T,gradchildren)]))
+            self.dJdx.append(np.dot(self.parents[1].evaluate().T,gradchildren))
             print(self.dJdx)
 #            print([gradchildren * self.parents[0].evaluate().T])
-            self.dJdx.append(np.array([np.dot(gradchildren,self.parents[0].evaluate().T)]))
+            self.dJdx.append(np.dot(gradchildren,self.parents[0].evaluate().T))
         print("djdx",self.dJdx)
         print("djdx2",self.dJdx[0])
         print(i_child)

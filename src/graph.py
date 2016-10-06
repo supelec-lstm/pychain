@@ -46,7 +46,7 @@ class Graph:
         costs = []
         for x, y in zip(X,Y):
             costs.append(self.backpropagate(x,y))
-        self.descend_gradient(learning_rate, batch_size = len(X))
+        self.descend_gradient(learning_rate, len(X))
         return costs
 
     def stochastic_gradient_descent(self, learning_rate, X, Y):

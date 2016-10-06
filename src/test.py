@@ -51,8 +51,8 @@ print("d1",d1.dJdx)
 print("e1",e1.dJdx)
 print("c1",c1.dJdx)
 
-print(w11)
-print(w12)
+print("w avant",w11)
+print("w après",w12)
 
 x = np.linspace(-0.5, 1.5, num = 100)
 plane = np.zeros((100,100))

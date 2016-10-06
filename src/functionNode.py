@@ -16,7 +16,7 @@ class FunctionNode(Node):
             print(self.gradient_f(self.parents[0].evaluate()))
             gradient = gradchildren*self.gradient_f(self.parents[0].evaluate())
             print("gradient", gradient)
-            self.dJdx.append(np.array([gradient]))
+            self.dJdx.append(gradient)
             print(self.dJdx)
         print("djdx",self.dJdx)
         return self.dJdx[i_child]
