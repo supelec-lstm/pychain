@@ -5,20 +5,20 @@ class FunctionNode(Node):
     """A node which applies an activation function"""
 
     def get_gradient(self, i_child):
-        print("getgradient", self, self.dJdx)
+        #print("getgradient", self, self.dJdx)
         if self.dJdx==None:
             self.dJdx = []
             #gradchildren = np.zeros(self.children[0][0].get_gradient(self.children[0][1]).shape)
             gradchildren = np.zeros(self.children[0][0].get_gradient(self.children[0][1]).shape)            
             for child in self.children:
                 gradchildren += child[0].get_gradient(child[1])
-            print("gradchildren",self, gradchildren)
-            print(self.gradient_f(self.parents[0].evaluate()))
+            #print("gradchildren",self, gradchildren)
+            #print(self.gradient_f(self.parents[0].evaluate()))
             gradient = gradchildren*self.gradient_f(self.parents[0].evaluate())
-            print("gradient", gradient)
+            #print("gradient", gradient)
             self.dJdx.append(gradient)
-            print(self.dJdx)
-        print("djdx",self.dJdx)
+            #print(self.dJdx)
+        #print("djdx",self.dJdx)
         return self.dJdx[i_child]
 
     def evaluate(self):

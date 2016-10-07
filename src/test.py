@@ -32,28 +32,32 @@ graph = Graph([input_nod, w1, w2, h1, s1, h2, s2, expected_output, d1, e1, c1], 
 print(graph.propagate(np.array([1,1,1])))
 print(graph.learnable_nodes[0])
 
-batch = np.array([[[0,0,1],[0]], [[0,1,1], [1]], [[1,0,1], [1]], [[1,1,1], [0]]])
+batch = ([[np.array([[0,0,1]]),np.array([[0]])], [np.array([[0,1,1]]), np.array([[1]])], [np.array([[1,0,1]]), np.array([[1]])], [np.array([[1,1,1]]), np.array([[0]])]])
 w11=w1.evaluate()
-X=[np.array([[0,1,1]])]
-Y=[np.array([1])]
+#X=[np.array([[0,1,1]])]
+#Y=[np.array([1])]
+X=[]
+Y=[]
+w11 = w1.evaluate()
+for i in range(10000):
+	n = randint(0,3)
+	X.append(batch[n][0])
+	Y.append(batch[n][1])
+
+costs = graph.batch_descent_gradient(0.7,X,Y)
+#w12=w1.evaluate()
+#print("w1",w1.dJdx, w1.acc_dJdw)
+#print("h1",h1.dJdx)
+#print("s1",s1.dJdx)
+#print("d1",d1.dJdx)
+#print("e1",e1.dJdx)
+#print("c1",c1.dJdx)
 #
-#for i in range(100000):
-#	n = randint(0,3)
-#	X.append(batch[n][0])
-#	Y.append(batch[n][1])
-
-costs = graph.batch_descent_gradient(1,X,Y)
+#print("w avant",w11)
+#print("w après",w12)
 w12=w1.evaluate()
-print("w1",w1.dJdx, w1.acc_dJdw)
-print("h1",h1.dJdx)
-print("s1",s1.dJdx)
-print("d1",d1.dJdx)
-print("e1",e1.dJdx)
-print("c1",c1.dJdx)
-
-print("w avant",w11)
-print("w après",w12)
-
+print(w11)
+print(w12)
 x = np.linspace(-0.5, 1.5, num = 100)
 plane = np.zeros((100,100))
 
