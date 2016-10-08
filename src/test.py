@@ -39,12 +39,13 @@ w11=w1.evaluate()
 X=[]
 Y=[]
 w11 = w1.evaluate()
-for i in range(10000):
+for i in range(100):
 	n = randint(0,3)
 	X.append(batch[n][0])
 	Y.append(batch[n][1])
-
-costs = graph.batch_descent_gradient(0.7,X,Y)
+costs=[]
+for j in range(10000):
+    costs.append(graph.batch_descent_gradient(0.8,X,Y))
 #w12=w1.evaluate()
 #print("w1",w1.dJdx, w1.acc_dJdw)
 #print("h1",h1.dJdx)
@@ -69,7 +70,12 @@ for i in range(100):
 plt.imshow(plane, origin = 'lower')
 
 plt.show()
-
-plt.plot(costs[0:100])
+cost2=[]
+for j in range(10000):
+    cost=0
+    for i in range(100):
+        cost+=costs[j][i]
+    cost2.append(cost/100)
+plt.plot(cost2)
 
 plt.show()
