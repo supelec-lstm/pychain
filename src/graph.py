@@ -30,7 +30,7 @@ class Graph:
         self.expected_output.set_value(y)                       #what if we put a matrix as input? will we take care of the gradient for the whole matrix or should we split the matrix and do it by line?
         self.cost_node.evaluate()
         for learnable_node in self.learnable_nodes:
-            learnable_node.get_gradient()
+            learnable_node.get_gradient(0)
 
         return self.cost_node.evaluate()
 
@@ -39,6 +39,7 @@ class Graph:
 
         for learnable_node in self.learnable_nodes:
             learnable_node.descend_gradient(learning_rate, batch_size)
+        self.reset_accumulators()
 
     def batch_descent_gradient(self, learning_rate,X,Y):
         """batch gradient descent"""
@@ -47,15 +48,6 @@ class Graph:
         for x, y in zip(X,Y):
             costs.append(self.backpropagate(x,y))
         self.descend_gradient(learning_rate, len(X))
-        return costs
-
-    def stochastic_gradient_descent(self, learning_rate, X, Y):
-        """Stochastic gradient descent"""
-
-        costs = []
-        for x, y in zip(X,Y):
-            costs.append(self.backpropagate(x,y))
-            self.descend_gradient(learning_rate, batch_size = 1)
         return costs
 
     def reset_memoization(self):

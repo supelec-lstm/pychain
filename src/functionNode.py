@@ -2,29 +2,10 @@ from node import *
 import numpy as np
 
 class FunctionNode(Node):
-    """A node which applies an activation function"""
-
-    def get_gradient(self, i_child):
-        #print("getgradient", self, self.dJdx)
-        if self.dJdx==None:
-            self.dJdx = []
-            #gradchildren = np.zeros(self.children[0][0].get_gradient(self.children[0][1]).shape)
-            gradchildren = np.zeros(self.children[0][0].get_gradient(self.children[0][1]).shape)            
-            for child in self.children:
-                gradchildren += child[0].get_gradient(child[1])
-            #print("gradchildren",self, gradchildren)
-            #print(self.gradient_f(self.parents[0].evaluate()))
-            gradient = gradchildren*self.gradient_f(self.parents[0].evaluate())
-            #print("gradient", gradient)
-            self.dJdx.append(gradient)
-            #print(self.dJdx)
-        #print("djdx",self.dJdx)
-        return self.dJdx[i_child]
 
     def evaluate(self):
         """Evaluate the output of the neuron with the f function implemented in the sub-classes"""
-
-        if self.y==None:
+        if self.y is None:
             self.y = self.f(self.parents[0].evaluate())
         return self.y
 
@@ -33,25 +14,16 @@ class FunctionNode(Node):
 
         raise NotImplementedError()
 
-    def gradient_f(self,x):
-        """Return gradient of the activation function, also implemented in the sub-classes"""
-
-        raise NotImplementedError()
-
-
-
-
-
-
 class SigmoidNode(FunctionNode):
     """The sigmoid function node"""
 
     def f(self, x):
         return 1 / (1 + np.exp(-x))
 
+    def compute_gradient(self, dJdy):
+        return dJdy * self.y*(1-self.y)
 
-    def gradient_f(self, x):
-        return self.f(x) * (1 - self.f(x))
+
 
 
 class TanhNode(FunctionNode):
@@ -60,39 +32,38 @@ class TanhNode(FunctionNode):
     def f(self, x):
         return np.tanh(x)
 
-    def gradient_f(self, x):
-        return 1 / (1 + x ** 2)
+    def compute_gradient(self, dJdy):
+        return dJdy * (1-np.square(self.y))
 
 
 class ReluNode(FunctionNode):
     """The rectified linear unit node"""
 
     def f(self, x):
-        return x if x > 0 else 0
+        return np.maximum(0,x)
 
-    def gradient_f(self, x):
-        return 1 if x > 0 else 0
+    def compute_gradient(self, dJdy):
+        return dJdy * (self.y >= 0)
 
 
 class SoftMaxNode(FunctionNode):
     """The softmax function node"""
 
     def f(self, x):
-        list = []
-        total = np.sum(np.exp(x))
-        for i in range(len(x)):
-            np.append(list,(np.exp(x[i]) / total))
-        return list
+        exp_x = np.exp(self.x)
+        sums = np.sum(exp_x, axis=1).reshape(exp_x.shape[0], 1)
+        return (exp_x / sums)
 
-    def gradient_f(self, x):
-        jacob = np.zeros((len(x),len(x)))
-        for i in range(len(x)):
-            for j in range(i,len(x)):
-                if i  != j:
-                    jacob[j][i], jacob[i][j] = (-a*b for a,b in zip(self.f(x[i]),self.f(x[j])))
-                else:
-                    jacob[j][i], jacob[i][j] = ((1-a )* b for a, b in zip(self.f(x[i]), self.f(x[i])))
-        return jacob
+    def compute_gradient(self, dJdy):
+        def delta(j, k):
+            return 1 if j == k else 0
+
+        dJdx = np.zeros((self.x.shape[0], self.x.shape[1]))
+        for i in range(dJdx.shape[0]):
+            for j in range(dJdx.shape[1]):
+                dJdx[i, j] = np.sum(dJdy[i, k] * (delta(j, k) - self.y[i, k]) * self.y[i, j] for k in range(self.y.shape[1]))
+
+        return dJdx
 
 
 class Norm2Node(FunctionNode):
@@ -102,8 +73,8 @@ class Norm2Node(FunctionNode):
     def f(self, x):
         return np.linalg.norm(x)
 
-    def gradient_f(self, x):
-        return 2*x
+    def compute_gradient(self, dJdy):
+        return dJdy *2 * self.parents[0].evaluate()
 
 class ScalarMultiplicationNode(FunctionNode):
 
@@ -118,5 +89,5 @@ class ScalarMultiplicationNode(FunctionNode):
     def f(self,x):
         return self.scalar*x
 
-    def gradient_f(self,x):
-        return self.scalar
+    def compute_gradient(self, dJdy):
+        return self.scalar * dJdy
