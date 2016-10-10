@@ -25,7 +25,7 @@ def test_simple_graph():
 	assert graph.propagate(x1) == 6
 	cost = graph.backpropagate(y1)
 	assert cost == 1
-	assert np.array_equal(weights_node.acc_dJdw, np.array([[2, 4, 6]])) 
+	assert np.array_equal(weights_node.acc_dJdw, np.array([[2], [4], [6]])) 
 
 	x2 = np.array([[1, 2, 3], [4, 5, 6]])
 	y2 = np.array([[5], [12]])
@@ -33,5 +33,5 @@ def test_simple_graph():
 	cost = graph.backpropagate(y2)
 	assert cost == 10
 	# [2, 4, 6] + [26, 34, 42]
-	assert np.array_equal(weights_node.acc_dJdw, np.array([[28, 38, 48]])) 
+	assert np.array_equal(weights_node.acc_dJdw, np.array([[28], [38], [48]])) 
 
