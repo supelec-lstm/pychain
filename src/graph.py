@@ -25,13 +25,13 @@ class Graph:
 		return cost
 
 	def descend_gradient(self, learning_rate, batch_size):
-		for node in self.learning_nodes:
+		for node in self.learnable_nodes:
 			node.descend_gradient(learning_rate, batch_size)
-		node.reset_accumulators()
+		self.reset_accumulators()
 
 	def batch_gradient_descent(self, x, y, learning_rate):
 		self.propagate(x)
-		cost = self.back_propagate(x)
+		cost = self.backpropagate(y)
 		self.descend_gradient(learning_rate, x.shape[0])
 		return cost
 
