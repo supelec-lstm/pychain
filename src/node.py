@@ -87,14 +87,16 @@ class FunctionNode(Node):
 	def get_gradient(self, i_child):
 		if self.dJdx is None:
 			dJdy = self.retrieve_output_gradient()
+			#print(type(self))
 			self.dJdx = np.dot(dJdy, self.gradient_f())
 		return self.dJdx
 
 class AddBiasNode(FunctionNode):
 	def f(self):
-		return np.concatenate((np.ones((x.shape[0], 1)), x), axis=1)
+		return np.concatenate((np.ones((self.x.shape[0], 1)), self.x), axis=1)
 
-	def gradient_f(self):
+	def get_gradient(self, i_child):
+		# Not very clean, we override get_gradient
 		if self.dJdx is None:
 			dJdy = self.retrieve_output_gradient()
 			self.dJdx = dJdy[1:,:]
@@ -104,35 +106,68 @@ class SigmoidNode(FunctionNode):
 	def f(self):
 		return 1 / (1 + np.exp(-self.x))
 
-	def gradient_f(self):
-		return self.y * (1 - self.y)
+	"""def gradient_f(self):
+		flat_y = self.y.flatten()
+		return np.diag(flat_y*(1-flat_y))"""
+
+	def get_gradient(self, i_child):
+		if self.dJdx is None:
+			dJdy = self.retrieve_output_gradient()
+			self.dJdx = dJdy * (self.y*(1 - self.y)).T
+		return self.dJdx
 
 class TanhNode(FunctionNode):
 	def f(self):
 		return np.tanh(self.x)
 
-	def gradient_f(self):
-		return 1 - np.square(self.y)
+	"""def gradient_f(self):
+		flat_y = self.y.flatten()
+		return np.diag(1-np.square(flat_y))"""
+
+	def get_gradient(self, i_child):
+		if self.dJdx is None:
+			dJdy = self.retrieve_output_gradient()
+			self.dJdx = dJdy * (1 - np.square(self.y)).T
+		return self.dJdx
 
 class ReluNode(FunctionNode):
 	def f(self):
 		return np.maximum(0, self.x)
 
-	def gradient_f(self):
-		return (self.y >= 0).astype(float)
+	"""def gradient_f(self):
+		flat_y = self.y.flatten()
+		return np.diag((flat_y >= 0).astype(float))"""
+
+	def get_gradient(self, i_child):
+		if self.dJdx is None:
+			dJdy = self.retrieve_output_gradient()
+			self.dJdx = dJdy * (self.x >= 0).T
+		return self.dJdx
 
 class SoftmaxNode(FunctionNode):
 	def f(self):
 		exp_x = np.exp(self.x)
-		total = np.sum(exp_x)
-		return exp_x / total
+		sums = np.sum(exp_x, axis=1).reshape(exp_x.shape[0], 1)
+		return (exp_x / sums)
 
-	def gradient_f(self):
+	"""def gradient_f(self):
 		df = np.zeros((len(self.y), len(self.x)))
 		for i in range(len(self.y)):
 			for j in range(len(self.x)):
 				df[i, j] = -self.y[i]*self.y[j] if i != j else self.y[i]*(1-self.y[i])
-		return df
+		return df"""
+
+	def get_gradient(self, i_child):
+		def delta(j, k):
+			return 1 if j == k else 0
+
+		if self.dJdx is None:
+			dJdy = self.retrieve_output_gradient()
+			self.dJdx = np.zeros((self.x.shape[1], self.x.shape[0]))
+			for j in range(self.dJdx.shape[0]):
+				for i in range(self.dJdx.shape[1]):
+					self.dJdx[j,i] = np.sum(dJdy[k,i]*(delta(j, k)-self.y[i,k])*self.y[i,j] for k in range(self.y.shape[1]))
+		return self.dJdx
 
 def ScalarMultiplicationNode(FunctionNode):
 	def __init__(self, parent, scalar):
@@ -210,12 +245,13 @@ class SigmoidCrossEntropyNode(BinaryOpNode):
 	def evaluate(self):
 		if self.y is None:
 			self.x = [self.parents[0].evaluate(), self.parents[1].evaluate()]
-			self.y = -(self.x[0]*np.log(x[1]) + (1-self.x[0])*np.log(1-x[1]))
+			self.y = -np.sum((self.x[0]*np.log(self.x[1]) + (1-self.x[0])*np.log(1-self.x[1])))
 		return self.y
 
 	def get_gradient(self, i_child):
 		if self.dJdx is None:
 			dJdy = self.retrieve_output_gradient()
+			# To verify
 			self.dJdx = [-(np.log(self.x[1]/(1-self.x[1]))), \
-				-(self.x[0]/self.x[1]-(1-self.x[0])/(1-self.x[1]))]
+				-(self.x[0]/self.x[1]-(1-self.x[0])/(1-self.x[1])).T]
 		return self.dJdx[i_child]
