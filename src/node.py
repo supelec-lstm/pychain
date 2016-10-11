@@ -38,7 +38,8 @@ class Node:
         if self.dJdx is None:
             dJdy = np.sum(child.get_gradient(i) for child,i in self.children)
             self.dJdx = self.compute_gradient(dJdy)
-        print(self)
+#        print(self)
+#        print('dJdx',self.dJdx,type(self.dJdx))
         return self.dJdx[i_child]
 
 
@@ -84,8 +85,10 @@ class LearnableNode(Node):
 
 
     def compute_gradient(self,dJdy):
-        print(dJdy, "y")
-        print(self.acc_dJdw)
+#        print(self)
+#        print(self.evaluate())
+#        print(dJdy, "y")
+#        print(self.acc_dJdw)
         self.acc_dJdw += dJdy
         return [dJdy]
 
@@ -129,7 +132,7 @@ class ConstantGradientNode(Node):
         return self.y
 
     def compute_gradient(self, dJdy):
-        return [1]
+        return [np.array([[1]])]
          
 class SoftmaxCrossEntropyNode(Node):
 

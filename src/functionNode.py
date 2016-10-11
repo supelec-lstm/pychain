@@ -21,7 +21,7 @@ class SigmoidNode(FunctionNode):
         return 1 / (1 + np.exp(-x))
 
     def compute_gradient(self, dJdy):
-        return dJdy * self.y*(1-self.y)
+        return [dJdy * self.y*(1-self.y)]
 
 
 
@@ -33,7 +33,7 @@ class TanhNode(FunctionNode):
         return np.tanh(x)
 
     def compute_gradient(self, dJdy):
-        return dJdy * (1-np.square(self.y))
+        return [dJdy * (1-np.square(self.y))]
 
 
 class ReluNode(FunctionNode):
@@ -43,7 +43,7 @@ class ReluNode(FunctionNode):
         return np.maximum(0,x)
 
     def compute_gradient(self, dJdy):
-        return dJdy * (self.y >= 0)
+        return [dJdy * (self.y >= 0)]
 
 
 class SoftMaxNode(FunctionNode):
@@ -63,7 +63,7 @@ class SoftMaxNode(FunctionNode):
             for j in range(dJdx.shape[1]):
                 dJdx[i, j] = np.sum(dJdy[i, k] * (delta(j, k) - self.y[i, k]) * self.y[i, j] for k in range(self.y.shape[1]))
 
-        return dJdx
+        return [dJdx]
 
 
 class Norm2Node(FunctionNode):
@@ -74,7 +74,7 @@ class Norm2Node(FunctionNode):
         return np.linalg.norm(x)
 
     def compute_gradient(self, dJdy):
-        return dJdy *2 * self.parents[0].evaluate()
+        return [dJdy *2 * self.parents[0].evaluate()]
 
 class ScalarMultiplicationNode(FunctionNode):
 
@@ -90,4 +90,4 @@ class ScalarMultiplicationNode(FunctionNode):
         return self.scalar*x
 
     def compute_gradient(self, dJdy):
-        return self.scalar * dJdy
+        return [self.scalar * dJdy]
