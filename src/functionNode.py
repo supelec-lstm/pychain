@@ -71,7 +71,7 @@ class Norm2Node(FunctionNode):
     """The norm two function node"""
 
     def f(self, x):
-        return np.linalg.norm(x)
+        return np.sum(np.square(x))
 
     def compute_gradient(self, dJdy):
         return [dJdy *2 * self.parents[0].evaluate()]

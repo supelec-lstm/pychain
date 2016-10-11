@@ -38,8 +38,8 @@ class Node:
         if self.dJdx is None:
             dJdy = np.sum(child.get_gradient(i) for child,i in self.children)
             self.dJdx = self.compute_gradient(dJdy)
-#        print(self)
-#        print('dJdx',self.dJdx,type(self.dJdx))
+        #print(self)
+        #print('dJdx',self.dJdx,type(self.dJdx))
         return self.dJdx[i_child]
 
 
