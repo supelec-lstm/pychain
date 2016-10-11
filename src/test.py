@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 input_nod = InputNode()
 
-w1 = LearnableNode((3,4))
+w1 = LearnableNode((3,2))
 
-w2 = LearnableNode((4,1))
+w2 = LearnableNode((2,1))
 
 
 h1 = MultiplicationNode([input_nod,w1 ])
@@ -43,8 +43,8 @@ costs=[]
 print(X)
 w11 = w1.evaluate().copy()
 w21=w2.evaluate().copy()
-for j in range(4000):
-    costs.append(graph.batch_descent_gradient(50,X,Y))
+for j in range(10000):
+    costs.append(graph.batch_descent_gradient(10,X,Y))
 
 w12 = w1.evaluate().copy()
 w22 = w2.evaluate().copy()
