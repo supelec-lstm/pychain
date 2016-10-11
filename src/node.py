@@ -40,6 +40,8 @@ class Node:
             self.dJdx = self.compute_gradient(dJdy)
         #print(self)
         #print('dJdx',self.dJdx,type(self.dJdx))
+#        print(dJdy)
+        #print(self,'djdx',type(self.dJdx[0]),self.dJdx)
         return self.dJdx[i_child]
 
 
@@ -67,7 +69,7 @@ class LearnableNode(Node):
     def __init__(self, shape, init_function = None):
         self.shape = shape
         if not init_function:
-            self.w = np.random.randn(self.shape[0],self.shape[1])*2-np.ones(self.shape)
+            self.w = np.random.randn(self.shape[0],self.shape[1])#*2-np.ones(self.shape)
         else:
             self.w = init_function(self.shape)
         self.dJdx = None
@@ -143,11 +145,11 @@ class SoftmaxCrossEntropyNode(Node):
         return [-dJdy * np.log(self.parents[1].evaluate()), -dJdy * (self.parents[0].evaluate() / self.parents[1].evaluate())]
 
 
-class SigmoidCrossEnropyNode(Node):
+class SigmoidCrossEntropyNode(Node):
 
     def evaluate(self):
-        return -np.sum((self.parents[0].evaluate() * np.log(self.parents[1].evaluate()) + (1 - self.parents[0].evaluate()) * np.log(1 - self.parents[1].evaluate())))
-
+        return -np.sum(self.parents[0].evaluate() * np.log(self.parents[1].evaluate()) + (1 - self.parents[0].evaluate()) * np.log(1 - self.parents[1].evaluate()))
+        
     def compute_gradient(self, dJdy):
 
         return [-dJdy * (np.log(self.parents[1].evaluate() / (1 - self.parents[1].evaluate()))),-dJdy * (self.parents[0].evaluate() / self.parents[1].evaluate() - (1 - self.parents[0].evaluate()) / (1 - self.parents[1].evaluate()))]

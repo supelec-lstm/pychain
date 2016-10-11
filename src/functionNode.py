@@ -43,7 +43,7 @@ class ReluNode(FunctionNode):
         return np.maximum(0,x)
 
     def compute_gradient(self, dJdy):
-        return [dJdy * (self.y >= 0)]
+        return [dJdy * (self.evaluate() > 0)]
 
 
 class SoftMaxNode(FunctionNode):
