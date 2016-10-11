@@ -135,7 +135,7 @@ class SoftmaxNode(FunctionNode):
 				dJdx[i,j] = np.sum(dJdy[i,k]*(delta(j, k)-self.y[i,k])*self.y[i,j] for k in range(self.y.shape[1]))
 		return dJdx
 
-def ScalarMultiplicationNode(FunctionNode):
+class ScalarMultiplicationNode(FunctionNode):
 	def __init__(self, parent, scalar):
 		FunctionNode.__init__(parent)
 		self.scalar = scalar
