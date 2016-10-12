@@ -188,14 +188,14 @@ def test_softmax_cross_entropy_node():
 	assert np.array_equal(node_sce.get_gradient(1), -np.array([[1, 1/2], [2/3, 2/4]]))
 
 def test_sigmoid_cross_entropy_node():
-	node_in1 = InputNode(np.array([[0], [1]]))
-	node_in2 = InputNode(np.array([[0.3], [0.6]]))
+	node_in1 = InputNode(np.array([[1, 0], [0.5, 0.7]]))
+	node_in2 = InputNode(np.array([[0.9, 0.3], [0.4, 0.8]]))
 	node_sce = SigmoidCrossEntropyNode(node_in1, node_in2)
-	node_fun = Norm2Node(node_sce)
-	node_out = ConstantGradientNode([node_fun])
+	node_out = ConstantGradientNode([node_sce])
 
-	#print(node_sce.evaluate())
-	#assert node_sce.evaluate() == -(np.log(0.7) + np.log(0.6))
-	#node_fun.evaluate()
-	#assert np.array_equal(node_sce.get_gradient(0), np.array([[0, -np.log(3)], [-np.log(2), -np.log(4)]]))
-	#assert np.array_equal(node_sce.get_gradient(1), -np.array([[1, 2/3], [1/2, 2/4]]))
+	y = -np.log(0.9) - np.log(0.7) - (0.5*np.log(0.4)+0.5*np.log(0.6)) - (0.7*np.log(0.8)+0.3*np.log(0.2))
+	assert np.array_equal(node_sce.evaluate(), y)
+	dJdin1 = np.array([[-np.log(0.9)+np.log(0.1), -np.log(0.3)+np.log(0.7)], [-np.log(0.4)+np.log(0.6), -np.log(0.8)+np.log(0.2)]])
+	assert np.allclose(node_sce.get_gradient(0), dJdin1)
+	dJdin2 = np.array([[-1/0.9, 1/0.7], [-0.5/0.4+0.5/0.6, -0.7/0.8+0.3/0.2]])
+	assert np.allclose(node_sce.get_gradient(1), dJdin2)
