@@ -73,21 +73,21 @@ if __name__ == '__main__':
 
     w1 = LearnableNode((784,10))
 
-    w2 = LearnableNode((10,10))
+    w2 = LearnableNode((10,1))
 
-    h1 = MultiplicationNode([input_nod,w1 ])
+    h1 = MultiplicationNode([input_nod,w1])
 
-    s1 = SigmoidNode([h1])
+    s1 = SoftMaxNode([h1])
 
     h2 = MultiplicationNode([s1,w2])
 
-    s2 = SigmoidNode([h2])
+    s2 = SoftMaxNode([h2])
 
     expected_output = InputNode()
 
-    d1 = SubstractionNode([s2, expected_output])
+    #d1 = SubstractionNode([s2, expected_output])
 
-    e1 = Norm2Node([d1])
+    e1 = SoftmaxCrossEntropyNode([s2, expected_output])
 
     #d1 = SigmoidCrossEntropyNode([s2, expected_output])
 
@@ -109,11 +109,12 @@ if __name__ == '__main__':
     X_test = normalized_dataset(X_test)
     Y_test = Y_test.reshape((len(Y_test), 1))
 
-    batch_size = 128
+    batch_size = 10000 #128
     start_time = time.time()
     for i in range(0, X.shape[0], batch_size):
         #network.stochastic_gradient_descent(X, Y, 0.3)
         print(i)
+        print('w1', w1.evaluate().shape)
         graph.batch_descent_gradient(0.8, X[i:i+batch_size], Y[i:i+batch_size])
         if (i % 2048) == 0:
             print('ACCURACY TRAINING:', accuracy(graph, X, Y))

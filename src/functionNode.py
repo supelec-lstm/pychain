@@ -6,6 +6,8 @@ class FunctionNode(Node):
     def evaluate(self):
         """Evaluate the output of the neuron with the f function implemented in the sub-classes"""
         if self.y is None:
+            
+            self.x = self.parents[0].evaluate()
             self.y = self.f(self.parents[0].evaluate())
         return self.y
 
@@ -48,17 +50,23 @@ class ReluNode(FunctionNode):
 
 class SoftMaxNode(FunctionNode):
     """The softmax function node"""
+    
 
     def f(self, x):
-        exp_x = np.exp(self.x)
+        print(x)
+        exp_x = np.exp(x)
+        print(x[0])
+        print('exp',exp_x.shape,self, exp_x[0,0])
         sums = np.sum(exp_x, axis=1).reshape(exp_x.shape[0], 1)
+        print(sums[0,0])
+        print('sortie soft',(exp_x / sums))
         return (exp_x / sums)
 
     def compute_gradient(self, dJdy):
         def delta(j, k):
             return 1 if j == k else 0
 
-        dJdx = np.zeros((self.x.shape[0], self.x.shape[1]))
+        dJdx = np.zeros((self.parents[0].evaluate().shape[0], self.parents[0].evaluate().shape[1]))
         for i in range(dJdx.shape[0]):
             for j in range(dJdx.shape[1]):
                 dJdx[i, j] = np.sum(dJdy[i, k] * (delta(j, k) - self.y[i, k]) * self.y[i, j] for k in range(self.y.shape[1]))
