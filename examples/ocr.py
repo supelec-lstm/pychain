@@ -32,7 +32,6 @@ def accuracy(graph, X, Y):
 	true_positive = 0
 	predicted_y = graph.propagate(X)
 	predicted_class = get_predicted_class(predicted_y)
-	print(Y.shape[0])
 	return np.sum(Y.flatten() == predicted_class) / Y.shape[0]
 
 def visualize(graph, X, Y, nb_samples=25):
@@ -48,19 +47,34 @@ def visualize(graph, X, Y, nb_samples=25):
 	plt.tight_layout()
 	plt.show()
 
+def fully_connected(layers):
+	input_node = InputNode()
+	nodes = [input_node]
+	learnable_nodes = []
+
+	prev_size = 28*28+1
+	cur_input_node = input_node
+	for i, size in enumerate(layers):
+		bias_node = AddBiasNode(cur_input_node)
+		weights_node = LearnableNode((prev_size, size), init_function)
+		prod_node = MultiplicationNode(bias_node, weights_node)
+		if i+1 < len(layers):
+			cur_input_node = TanhNode(prod_node)
+		else:
+			cur_input_node = SoftmaxNode(prod_node)
+		learnable_nodes += [weights_node]
+		nodes += [bias_node, weights_node, prod_node, cur_input_node]
+		prev_size = size+1
+	
+	expected_output_node = InputNode()
+	cost_node = SoftmaxCrossEntropyNode(expected_output_node, cur_input_node)
+
+	nodes += [expected_output_node, cost_node]
+	return Graph(nodes, input_node, cur_input_node, expected_output_node, cost_node, learnable_nodes) 
+
 if __name__ == '__main__':
 	input_node = InputNode()
-	bias1_node = AddBiasNode(input_node)
-
-	weights1_node = LearnableNode((28*28+1, 10), init_function)
-	prod1_node = MultiplicationNode(bias1_node, weights1_node)
-
-	output_node = SoftmaxNode(prod1_node)
-	expected_output_node = InputNode()
-	cost_node = SoftmaxCrossEntropyNode(expected_output_node, output_node)
-
-	nodes = [input_node, bias1_node, weights1_node, prod1_node, output_node, expected_output_node, cost_node]
-	graph = Graph(nodes, input_node, output_node, expected_output_node, cost_node, [weights1_node]) 
+	graph = fully_connected([10])
 
 	X, (nb_rows, nb_columns), Y = get_training_set('examples/mnist')
 	print(X.shape)
@@ -77,12 +91,24 @@ if __name__ == '__main__':
 
 	batch_size = 128
 	start_time = time.time()
-	for i in range(0, X.shape[0], batch_size):
-		print(i)
-		print(graph.batch_gradient_descent(X[i:i+batch_size], ohe_Y[i:i+batch_size], 0.3) / 128)
-		if (i % 2048) == 0:
-			print('ACCURACY TRAINING:', accuracy(graph, X, Y))
-			print('ACCURACY TEST:', accuracy(graph, X_test, Y_test))
-	print('ACCURACY TEST:', accuracy(graph, X_test, Y_test))
+	t = []
+	accuracies_training = []
+	accuracies_test = []
+	for j in range(1):
+		for i in range(0, X.shape[0], batch_size):
+			print(i)
+			print(graph.batch_gradient_descent(X[i:i+batch_size], ohe_Y[i:i+batch_size], 0.1) / batch_size)
+			if (i % 2048) == 0:
+				t.append(j*60000+min(i+batch_size, 60000))
+				accuracies_training.append(accuracy(graph, X, Y))
+				accuracies_test.append(accuracy(graph, X_test, Y_test))
 	print('DURATION: ', time.time() - start_time)
+	print(t, accuracies_training, accuracies_test)
+	plt.plot(t, accuracies_training, label='apprentissage')
+	plt.plot(t, accuracies_test, label='test')
+	plt.xlabel("Nombre d'exemples")
+	plt.ylabel('Précision')
+	plt.title("Précision en fonction du nombre d'exemples vus (batch de 128, une couche softmax)")
+	plt.legend()
+	plt.show()
 	visualize(graph, X_test, Y_test)
