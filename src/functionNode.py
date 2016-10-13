@@ -53,13 +53,13 @@ class SoftMaxNode(FunctionNode):
     
 
     def f(self, x):
-        print(x)
+        #print(x)
         exp_x = np.exp(x)
-        print(x[0])
-        print('exp',exp_x.shape,self, exp_x[0,0])
+        #print(x[0])
+        #print('exp',exp_x.shape,self, exp_x[0,0])
         sums = np.sum(exp_x, axis=1).reshape(exp_x.shape[0], 1)
-        print(sums[0,0])
-        print('sortie soft',(exp_x / sums))
+        #print(sums[0,0])
+        #print('sortie soft',(exp_x / sums))
         return (exp_x / sums)
 
     def compute_gradient(self, dJdy):
@@ -67,10 +67,13 @@ class SoftMaxNode(FunctionNode):
             return 1 if j == k else 0
 
         dJdx = np.zeros((self.parents[0].evaluate().shape[0], self.parents[0].evaluate().shape[1]))
+        #print('y', self.y.shape)
+        #print('djdyshape',dJdy.shape)
+        #print(dJdy)
         for i in range(dJdx.shape[0]):
             for j in range(dJdx.shape[1]):
                 dJdx[i, j] = np.sum(dJdy[i, k] * (delta(j, k) - self.y[i, k]) * self.y[i, j] for k in range(self.y.shape[1]))
-
+        #print('gradsoft',dJdx)
         return [dJdx]
 
 
