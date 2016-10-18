@@ -40,7 +40,7 @@ if __name__ == '__main__':
 		cost_node]
 	graph = Graph(nodes, input_node, output_node, expected_output_node, cost_node, [weights_node])
 
-	X, Y = or_dataset(100)
+	X, Y = or_dataset()
 	Y = Y.reshape((len(Y), 1))
 	for _ in range(100):
 		print(graph.batch_gradient_descent(X, Y, 1) / 100)
