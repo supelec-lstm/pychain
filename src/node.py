@@ -1,4 +1,5 @@
 import numpy as np
+from numba import jit, vectorize
 
 class Node:
 	def __init__(self, parents=None):
@@ -98,12 +99,20 @@ class AddBiasNode(FunctionNode):
 	def compute_gradient(self, dJdy):
 		return dJdy[:,1:]
 
+@vectorize(['float64(float64)', 'float32(float32)'])
+def sigmoid(x):
+	return 1 / (1 + np.exp(-x))
+
+@vectorize(['float64(float64, float64)', 'float32(float32, float32)'])
+def sigmoid_gradient(dJdy, y):
+	return dJdy*y*(1-y)
+
 class SigmoidNode(FunctionNode):
 	def compute_output(self):
-		return 1 / (1 + np.exp(-self.x))
+		return sigmoid(self.x)
 
 	def compute_gradient(self, dJdy):
-		return dJdy * (self.y*(1 - self.y))
+		return  sigmoid_gradient(dJdy, self.y)
 
 class TanhNode(FunctionNode):
 	def compute_output(self):
@@ -120,19 +129,24 @@ class ReluNode(FunctionNode):
 		return dJdy * (self.x >= 0)
 
 class SoftmaxNode(FunctionNode):
+	@jit
 	def compute_output(self):
 		exp_x = np.exp(self.x)
 		sums = np.sum(exp_x, axis=1).reshape(exp_x.shape[0], 1)
 		return (exp_x / sums)
 
+	@jit
 	def compute_gradient(self, dJdy):
-		def delta(j, k):
-			return 1 if j == k else 0
-
 		dJdx = np.zeros((self.x.shape[0], self.x.shape[1]))
 		for i in range(dJdx.shape[0]):
 			for j in range(dJdx.shape[1]):
-				dJdx[i,j] = np.sum(dJdy[i,k]*(delta(j, k)-self.y[i,k])*self.y[i,j] for k in range(self.y.shape[1]))
+				s = 0
+				for k in range(self.y.shape[1]):
+					if j == k:
+						s += dJdy[i,k]*(1-self.y[i,k])*self.y[i,j]
+					else:
+						s -= dJdy[i,k]*self.y[i,k]*self.y[i,j]
+				dJdx[i,j] = s
 		return dJdx
 
 class ScalarMultiplicationNode(FunctionNode):

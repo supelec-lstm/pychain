@@ -12,11 +12,13 @@ class Graph:
 		# Create a constant gradient neuron
 		ConstantGradientNode([cost_node])
 
+	@jit
 	def propagate(self, x):
 		self.reset_memoization()
 		self.input_node.set_value(x)
 		return self.output_node.evaluate()
 
+	@jit
 	def backpropagate(self, y):
 		self.expected_output_node.set_value(y)
 		cost = self.cost_node.evaluate()
@@ -24,21 +26,25 @@ class Graph:
 			node.get_gradient(0)
 		return cost
 
+	@jit
 	def descend_gradient(self, learning_rate, batch_size):
 		for node in self.learnable_nodes:
 			node.descend_gradient(learning_rate, batch_size)
 		self.reset_accumulators()
 
+	@jit
 	def batch_gradient_descent(self, x, y, learning_rate):
 		self.propagate(x)
 		cost = self.backpropagate(y)
 		self.descend_gradient(learning_rate, x.shape[0])
 		return cost
 
+	@jit
 	def reset_memoization(self):
 		for node in self.nodes:
 			node.reset_memoization()
 
+	@jit
 	def reset_accumulators(self):
 		for node in self.learnable_nodes:
 			node.reset_accumulator()
