@@ -126,13 +126,16 @@ class SoftmaxNode(FunctionNode):
 		return (exp_x / sums)
 
 	def compute_gradient(self, dJdy):
-		def delta(j, k):
-			return 1 if j == k else 0
-
 		dJdx = np.zeros((self.x.shape[0], self.x.shape[1]))
 		for i in range(dJdx.shape[0]):
 			for j in range(dJdx.shape[1]):
-				dJdx[i,j] = np.sum(dJdy[i,k]*(delta(j, k)-self.y[i,k])*self.y[i,j] for k in range(self.y.shape[1]))
+				s = 0
+				for k in range(self.y.shape[1]):
+					if j != k:
+						s -= dJdy[i,k]*self.y[i,k]*self.y[i,j]
+					else:
+						s += dJdy[i,k]*(1-self.y[i,k])*self.y[i,j]
+				dJdx[i,j] = s
 		return dJdx
 
 class ScalarMultiplicationNode(FunctionNode):
