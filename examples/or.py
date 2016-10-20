@@ -25,6 +25,8 @@ def visualize(graph, n):
 	for j in range(n):
 		Y[:,j] = graph.propagate(np.array([[x1min+i*dx1, x2min+j*dx2] for i in range(n)])).flatten()
 	plt.imshow(Y, extent=[x1min, x1max, x2min, x2max], vmin=0, vmax=1, interpolation='none', origin='lower')
+	plt.xlabel('x1')
+	plt.ylabel('x2')
 	plt.colorbar()
 	plt.show()
 
