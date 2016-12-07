@@ -104,9 +104,14 @@ class RecurrentNetwork:
 				child[0].parents = [parent for parent in child[0].parents if parent is not node]
 		for node in self.graph_unfolded.recurrent_nodes:
 			node.children = []
-		for node in self.graph_unfolded.recurrent_nodes:
+		"""for node in self.graph_unfolded.recurrent_nodes:
 			self.graph_unfolded.node_grappin_arrivee.parents.append(node)
-			node.add_child(self.graph_unfolded.node_grappin_arrivee,len(self.graph_unfolded.node_grappin_arrivee.parents))
+			node.add_child(self.graph_unfolded.node_grappin_arrivee,len(self.graph_unfolded.node_grappin_arrivee.parents))"""
+		self.graph_unfolded.nodes.remove(self.graph_unfolded.recurrent_nodes[0])
+		Nodeh = InputNode()
+		Nodeh.set_parents([self.graph_unfolded.node_grappin_depart])
+		self.graph_unfolded.node_grappin_arrivee.set_parents([Nodeh])
+		self.graph_unfolded.nodes.append(Nodeh)
 
 def init_function(shape):
     return (np.random.rand(*shape) * 0.2 - 0.1)
