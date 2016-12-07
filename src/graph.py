@@ -124,7 +124,7 @@ sigmoid.add_child(recurrent,0)
 nodes = [input, learnable,concatenate,multiplication,sigmoid,recurrent,expected,cost]
 graphe = Graph(nodes,[input],[sigmoid],[expected],[cost],[learnable],[recurrent],[concatenate],sigmoid,concatenate)
 graphe_recurrent = RecurrentNetwork(graphe)
-graphe_recurrent.unfold(1)
+graphe_recurrent.unfold(2)
 for node in graphe_recurrent.graph_unfolded.nodes:
 	print(node, node.parents)
 
