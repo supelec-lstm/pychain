@@ -50,11 +50,6 @@ def test_delay_once_node():
     value = np.array([[1, 2], [3, 4], [5, 6]])	
     input_node = InputNode(value)
     delay_once_node = DelayOnceNode(input_node)
-    
-    assert np.array_equal(delay_once_node.evaluate(), np.array([[1, 2], [3, 4], [5, 6]]))
-    input_node.set_value(np.array([[3, 2], [5, 4]]))
-    delay_once_node.reset_value()
-    assert np.array_equal(delay_once_node.evaluate(), np.array([[3, 2], [5, 4]]))
 
 def test_sigmoid_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])		
@@ -106,12 +101,14 @@ def test_softmax_node():
 	y = np.array([[y11, y12], [y21, y22], [y31, y32]])
 	assert np.array_equal(softmax_node.evaluate(), y)
 	norm2_node.evaluate()
-	dx11 = 2*(y11*(1-y11)*y11 - y11*y12*y12)
+	dx11 = 2*(y11*(1-y11)*y11 - y12*y11*y12)
 	dx12 = 2*(-y11*y12*y11 + y12*(1-y12)*y12)
 	dx21 = 2*(y21*(1-y21)*y21 - y21*y22*y22)
 	dx22 = 2*(-y21*y22*y21 + y22*(1-y22)*y22)
 	dx31 = 2*(y31*(1-y31)*y31 - y31*y32*y32)
 	dx32 = 2*(-y31*y32*y31 + y32*(1-y32)*y32)
+	print(softmax_node.get_gradient(0))
+	print(np.array([[dx11, dx12], [dx21, dx22], [dx31, dx32]]))
 	assert np.allclose(softmax_node.get_gradient(0), np.array([[dx11, dx12], [dx21, dx22], [dx31, dx32]]))
 
 def scalar_multiplication_node():
@@ -189,11 +186,11 @@ def test_multiplication_node():
 def test_concatenate_node():
     node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
     node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
-    node_conca = ConcatenateNode(node_in1,node_in2)
+    node_conca = ConcatenateNode(node_in1, node_in2)
     node_fun = Norm2Node(node_conca)
     node_out = ConstantGradientNode([node_fun])
 
-    assert np.array_equal(node_conca.evaluate(), np.array([[1, 1], [2, 2], [1, 2], [3, 4]]))
+    assert np.array_equal(node_conca.evaluate(), np.array([[1, 1, 1, 2], [2, 2, 3, 4]]))
     node_fun.evaluate()
     assert np.array_equal(node_conca.get_gradient(0), np.array([[2, 2], [4, 4]]))
     assert np.array_equal(node_conca.get_gradient(1), np.array([[2, 4], [6, 8]]))

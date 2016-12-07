@@ -75,14 +75,9 @@ class ConstantGradientNode(Node):
     def get_gradient(self, i_child):
         return 1
 
-class DelayonceNode (InputNode):
-    def __init__(self, parents):
-        Node.__init__(self, None)
-        self.parents = parents
-        self.set_value(self.parents.evaluate())
-    
-    def reset_value(self):
-        self.set_value(self.parents.evaluate())
+class DelayOnceNode(Node):
+    def __init__(self, parent):
+        Node.__init__(self, [parent])
         
 class FunctionNode(Node):
     def __init__(self, parent):
@@ -143,8 +138,8 @@ class SoftmaxNode(FunctionNode):
                     if j != k:
                         s -= dJdy[i,k]*self.y[i,k]*self.y[i,j]
                     else:
-                        s += dJdy[i,k]*(1-self.y[i,k])*self.y[i,j]
-                        dJdx[i,j] = s
+                        s += dJdy[i,k]*(1-self.y[i,k])*self.y[i,k]
+                dJdx[i,j] = s
         return dJdx
 
 class ScalarMultiplicationNode(FunctionNode):
@@ -192,10 +187,10 @@ class MultiplicationNode(BinaryOpNode):
 
 class ConcatenateNode(BinaryOpNode):
     def compute_output(self):
-        return np.concatenate(self.x[0], self.x[1])
+        return np.concatenate((self.x[0], self.x[1]), axis=1)
 
     def compute_gradient(self, dJdy):
-        return [dJdy[:,:len(self.x[0])],dJdy[:,len(self.x[0])+1:]]
+        return [dJdy[:,:len(self.x[0])], dJdy[:,len(self.x[0]):]]
 
 class SoftmaxCrossEntropyNode(BinaryOpNode):
     def compute_output(self):
