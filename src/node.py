@@ -2,10 +2,8 @@ import numpy as np
 
 class Node:
     def __init__(self, parents=None):
-        self.parents = parents or []
+        self.set_parents(parents or [])
         self.children = []
-        if parents:
-            self.set_parents(parents)
 
         self.x = None
         self.y = None
