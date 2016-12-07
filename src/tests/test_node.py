@@ -46,6 +46,16 @@ def test_add_bias_node():
 	assert norm2_node.evaluate() == 94
 	assert np.array_equal(add_bias_node.get_gradient(0), 2*value)
 
+def test_delay_once_node():
+    value = np.array([[1, 2], [3, 4], [5, 6]])	
+    input_node = InputNode(value)
+    delay_once_node = DelayOnceNode(input_node)
+    
+    assert np.array_equal(delay_once_node.evaluate(), np.array([[1, 2], [3, 4], [5, 6]]))
+    input_node.set_value(np.array([[3, 2], [5, 4]]))
+    delay_once_node.reset_value()
+    assert np.array_equal(delay_once_node.evaluate(), np.array([[3, 2], [5, 4]]))
+
 def test_sigmoid_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])		
 	input_node = InputNode(value)
@@ -108,12 +118,12 @@ def scalar_multiplication_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])	
 	input_node = InputNode(value)
 	scalar_node = ScalarMultiplicationNode(input_node, 3)
-	norm2_node = Norm2Node(add_bias_node)
+	norm2_node = Norm2Node(scalar_node)
 	output_node = ConstantGradientNode([norm2_node])
 
-	assert np.array_equal(add_bias_node.evaluate(), 3*value)
+	assert np.array_equal(scalar_node.evaluate(), 3*value)
 	norm2_node.evaluate()
-	assert np.array_equal(add_bias_node.get_gradient(0), 6*value)
+	assert np.array_equal(scalar_node.get_gradient(0), 6*value)
 
 def init_ones(shape):
 	return np.ones(shape)
@@ -175,6 +185,19 @@ def test_multiplication_node():
 	node_fun.evaluate()
 	assert np.array_equal(node_dot.get_gradient(0), np.array([[32, 72], [64, 144]]))
 	assert np.array_equal(node_dot.get_gradient(1), np.array([[40, 60], [40, 60]]))
+
+def test_concatenate_node():
+    node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
+    node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
+    node_conca = ConcatenateNode(node_in1,node_in2)
+    node_fun = Norm2Node(node_conca)
+    node_out = ConstantGradientNode([node_fun])
+
+    assert np.array_equal(node_conca.evaluate(), np.array([[1, 1], [2, 2], [1, 2], [3, 4]]))
+    node_fun.evaluate()
+    assert np.array_equal(node_conca.get_gradient(0), np.array([[2, 2], [4, 4]]))
+    assert np.array_equal(node_conca.get_gradient(1), np.array([[2, 4], [6, 8]]))
+ 
 
 def test_softmax_cross_entropy_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
