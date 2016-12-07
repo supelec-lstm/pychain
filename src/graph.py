@@ -127,5 +127,6 @@ graphe_recurrent = RecurrentNetwork(graphe)
 graphe_recurrent.unfold(2)
 for node in graphe_recurrent.graph_unfolded.nodes:
 	print(node, node.parents)
+	print(node,node.children)
 
 

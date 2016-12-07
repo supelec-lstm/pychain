@@ -2,7 +2,6 @@ import numpy as np
 
 class Node:
     def __init__(self, parents=None):
-        print("Ok pour construct Node")
         self.set_parents(parents or [])
         self.children = []
 
@@ -11,7 +10,6 @@ class Node:
         self.dJdx = None
 
     def set_parents(self, parents):
-        print("ok pour entree")
         self.parents = parents
         for i, parent in enumerate(self.parents):
             parent.add_child(self, i)
@@ -86,7 +84,6 @@ class DelayOnceNode(Node):
         
 class FunctionNode(Node):
     def __init__(self, parents=None):
-        print("ok pour construct functionNode")
         Node.__init__(self, parents)
 
     def evaluate(self):
