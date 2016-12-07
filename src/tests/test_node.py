@@ -12,6 +12,15 @@ def test_add_child():
 	node3 = Node([node1])
 	assert node1.children == [(node2, 0), (node3, 0)]
 
+def test_add_parents():
+	node1 = Node()
+	node2 = Node()
+	node3 = Node()
+	node3.set_parents([node1, node2])
+	assert node3.parents == [node1, node2]
+	assert node1.children == [(node3, 0)]
+	assert node2.children == [(node3, 1)]
+
 def test_input_node():
 	value = np.array([[1,1,1],[2,2,2]])
 	input_node = InputNode(value)

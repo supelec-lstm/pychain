@@ -4,12 +4,17 @@ class Node:
     def __init__(self, parents=None):
         self.parents = parents or []
         self.children = []
-        for i, parent in enumerate(self.parents):
-            parent.add_child(self, i)
+        if parents:
+            self.set_parents(parents)
 
         self.x = None
         self.y = None
         self.dJdx = None
+
+    def set_parents(self, parents):
+        self.parents = parents
+        for i, parent in enumerate(self.parents):
+            parent.add_child(self, i)
         
     def add_child(self, child, i_child):
         self.children.append((child, i_child))
