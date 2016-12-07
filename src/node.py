@@ -2,6 +2,7 @@ import numpy as np
 
 class Node:
     def __init__(self, parents=None):
+        print("Ok pour construct Node")
         self.set_parents(parents or [])
         self.children = []
 
@@ -10,6 +11,7 @@ class Node:
         self.dJdx = None
 
     def set_parents(self, parents):
+        print("ok pour entree")
         self.parents = parents
         for i, parent in enumerate(self.parents):
             parent.add_child(self, i)
@@ -79,12 +81,13 @@ class ConstantGradientNode(Node):
         return 1
 
 class DelayOnceNode(Node):
-    def __init__(self, parent):
-        Node.__init__(self, [parent])
+    def __init__(self, parent=None):
+        Node.__init__(self, parent)
         
 class FunctionNode(Node):
-    def __init__(self, parent):
-        Node.__init__(self, [parent])
+    def __init__(self, parents=None):
+        print("ok pour construct functionNode")
+        Node.__init__(self, parents)
 
     def evaluate(self):
         if self.y is None:
@@ -146,8 +149,8 @@ class SoftmaxNode(FunctionNode):
         return dJdx
 
 class ScalarMultiplicationNode(FunctionNode):
-    def __init__(self, parent, scalar):
-        FunctionNode.__init__(parent)
+    def __init__(self, parent=None, scalar=1):
+        FunctionNode.__init__(self,parent)
         self.scalar = scalar
 
     def compute_output(self):
@@ -164,8 +167,11 @@ class Norm2Node(FunctionNode):
         return 2*self.x*dJdy
 
 class BinaryOpNode(Node):
-    def __init__(self, parent1, parent2):
-        Node.__init__(self, [parent1, parent2])
+    def __init__(self, parent1=None, parent2=None):
+        if parent1 is None and parent2 is None:
+            Node.__init__(self)
+        else:
+            Node.__init__(self, [parent1, parent2])
 
 class AdditionNode(BinaryOpNode):
     def compute_output(self):
@@ -208,3 +214,5 @@ class SigmoidCrossEntropyNode(BinaryOpNode):
 
     def compute_gradient(self, dJdy):
         return [-dJdy*(np.log(self.x[1]/(1-self.x[1]))), -dJdy*(self.x[0]/self.x[1]-(1-self.x[0])/(1-self.x[1]))]
+
+nodescal = ScalarMultiplicationNode()

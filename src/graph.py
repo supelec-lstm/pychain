@@ -14,7 +14,7 @@ class Graph:
 		self.node_grappin_arrivee = node_grappin_arrivee
 
 		# Create a constant gradient neuron
-		ConstantGradientNode([cost_node])
+		#ConstantGradientNode([cost_node])
 
 	def propagate(self, x):
 		self.reset_memoization()
@@ -51,7 +51,7 @@ class RecurrentNetwork:
 
 	def __init__(self,graph):
 		self.graph = graph
-		self.graph_unfolded = None
+		self.graph_unfolded = graph
 
 	def replicate_graph(self):
 		new_nodes = []
@@ -61,12 +61,12 @@ class RecurrentNetwork:
 		new_cost_node = []
 		new_node_grappin_arrivee = None
 		new_node_grappin_depart = None
-		nodes_interessants = [node for node in self.graph.nodes if (node not in self.graph.recurrent_node and node not in self.learnable_nodes)]
+		nodes_interessants = [node for node in self.graph.nodes if (node not in self.graph.recurrent_nodes and node not in self.graph.learnable_nodes)]
 		for i in range(len(nodes_interessants)):
 			new_nodes.append(type(nodes_interessants[i])())
 			if nodes_interessants[i] is self.graph.node_grappin_arrivee:
 				new_node_grappin_arrivee = new_nodes[i]
-			if nodes_interessants[i] is self.graph.node_grappin_arrivee:
+			if nodes_interessants[i] is self.graph.node_grappin_depart:
 				new_node_grappin_depart = new_nodes[i]
 			if nodes_interessants[i] in self.graph.input_node:
 				new_input_node.append(new_nodes[i])
@@ -75,15 +75,20 @@ class RecurrentNetwork:
 			if nodes_interessants[i] in self.graph.expected_output_node:
 				new_expected_output_node.append(new_nodes[i])
 			if nodes_interessants[i] in self.graph.cost_node:
-				new_cost_node[i].append(new_nodes[i])
+				new_cost_node.append(new_nodes[i])
 		for i in range(len(nodes_interessants)):
 			for j in range(len(nodes_interessants)):
 				if nodes_interessants[j] in nodes_interessants[i].parents:
-					new_nodes[i].add_child(new_nodes[j])
+					new_nodes[i].parents.append(new_nodes[j])
+					new_nodes[j].add_child(new_nodes[i],len(new_nodes[i].parents))
+					#new_nodes[j].set_parents([new_nodes[i]])
 		for i in range(len(nodes_interessants)):
 			for learnable in self.graph.learnable_nodes:
 				if learnable in nodes_interessants[i].parents:
-					learnable.add_child(new_nodes[i])
+					new_nodes[i].parents.append(learnable)
+					learnable.add_child(new_nodes[i],len(new_nodes[i].parents))
+					#new_nodes[i].set_parents([learnable])
+
 
 		return [new_nodes,new_input_node,new_output_node,new_expected_output_node,new_cost_node,new_node_grappin_depart,new_node_grappin_arrivee]
 
@@ -91,12 +96,36 @@ class RecurrentNetwork:
 	def unfold(self,k):
 		for j in range(k):
 			[new_nodes, new_input_node, new_output_node, new_expected_output_node, new_cost_node,new_node_grappin_depart, new_node_grappin_arrivee] = self.replicate_graph()
-			new_node_grappin_depart.add_child(self.graph.unfolded.node_grappin_arrivee)
-			self.graph.unfolded = Graph(self.graph.nodes+new_nodes,self.graph.input_node+new_input_node,self.graph.output_node+new_output_node,self.graph.expected_output_node+new_expected_output_node,self.graph.cost_node+new_cost_node,self.graph.learnable_nodes,self.graph.recurrent_nodes,self.graph.concatenate_node,self.graph.node_grappin_depart,new_node_grappin_arrivee)
-		for node in self.graph.unfolded.recurrent_nodes:
+			self.graph_unfolded.node_grappin_arrivee.parents.append(new_node_grappin_depart)
+			new_node_grappin_depart.add_child(self.graph_unfolded.node_grappin_arrivee,len(self.graph_unfolded.node_grappin_arrivee.parents))
+			self.graph_unfolded = Graph(self.graph_unfolded.nodes+new_nodes,self.graph_unfolded.input_node+new_input_node,self.graph_unfolded.output_node+new_output_node,self.graph_unfolded.expected_output_node+new_expected_output_node,self.graph_unfolded.cost_node+new_cost_node,self.graph_unfolded.learnable_nodes,self.graph_unfolded.recurrent_nodes,self.graph_unfolded.concatenate_node,self.graph_unfolded.node_grappin_depart,new_node_grappin_arrivee)
+		for node in self.graph_unfolded.recurrent_nodes:
 			for child in node.children:
-				child.parents = [parent for parent in child.parents if parent is not node]
-		for node in self.graph.unfolded.recurrent_nodes:
+				child[0].parents = [parent for parent in child[0].parents if parent is not node]
+		for node in self.graph_unfolded.recurrent_nodes:
 			node.children = []
 		for node in self.graph_unfolded.recurrent_nodes:
-			node.add_child(self.graph_unfolded.node_grappin_arrivee)
+			self.graph_unfolded.node_grappin_arrivee.parents.append(node)
+			node.add_child(self.graph_unfolded.node_grappin_arrivee,len(self.graph_unfolded.node_grappin_arrivee.parents))
+
+def init_function(shape):
+    return (np.random.rand(*shape) * 0.2 - 0.1)
+
+input = InputNode()
+learnable = LearnableNode((2,1),init_function)
+recurrent = DelayOnceNode()
+concatenate = ConcatenateNode(input,recurrent)
+multiplication = MultiplicationNode(learnable,concatenate)
+sigmoid = SigmoidNode([multiplication])
+expected = InputNode()
+cost = Norm2Node([sigmoid,expected])
+recurrent.parents.append(sigmoid)
+sigmoid.add_child(recurrent,0)
+nodes = [input, learnable,concatenate,multiplication,sigmoid,recurrent,expected,cost]
+graphe = Graph(nodes,[input],[sigmoid],[expected],[cost],[learnable],[recurrent],[concatenate],sigmoid,concatenate)
+graphe_recurrent = RecurrentNetwork(graphe)
+graphe_recurrent.unfold(1)
+for node in graphe_recurrent.graph_unfolded.nodes:
+	print(node, node.parents)
+
+
