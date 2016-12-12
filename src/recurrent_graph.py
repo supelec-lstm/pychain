@@ -74,7 +74,10 @@ class RecurrentGraph:
 			for node in self.graph.nodes:
 				if node in self.graph.learnable_nodes or type(node) == DelayOnceNode:
 					continue
-				new_node = type(node)()
+				if type(node) == SelectionNode:
+					new_node = SelectionNode(None, node.start, node.end)
+				else:
+					new_node = type(node)()
 				if node in self.graph.input_nodes:
 					input_nodes.append(new_node)
 				if node in self.graph.output_nodes:
