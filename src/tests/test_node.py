@@ -228,3 +228,21 @@ def test_sigmoid_cross_entropy_node():
 	assert np.allclose(node_sce.get_gradient(0), dJdin1)
 	dJdin2 = np.array([[-1/0.9, 1/0.7], [-0.5/0.4+0.5/0.6, -0.7/0.8+0.3/0.2]])
 	assert np.allclose(node_sce.get_gradient(1), dJdin2)
+
+def test_sum_node():
+	node_in1 = InputNode(np.array([[1, 0], [0.5, 0.7]]))
+	node_in2 = InputNode(np.array([[0.9, 0.3], [0.4, 0.8]]))
+	node_in3 = InputNode(np.array([[2, 3], [5, 6]]))
+	node_sum = SumNode([node_in1, node_in2, node_in3])
+	node_norm = Norm2Node(node_sum)
+	node_out = ConstantGradientNode([node_norm])
+	assert np.array_equal(node_sum.evaluate(), np.array([[3.9, 3.3], [5.9, 7.5]]))
+
+	node_in1 = InputNode(2)
+	node_in2 = InputNode(3)
+	node_in3 = InputNode(1)
+	node_sum = SumNode([node_in1, node_in2, node_in3])
+	node_out = ConstantGradientNode([node_sum])
+	assert node_sum.evaluate() == 6
+	print(node_sum.get_gradient(0))
+	assert node_sum.get_gradient(0) == 1

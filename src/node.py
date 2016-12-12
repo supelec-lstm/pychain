@@ -80,11 +80,17 @@ class ConstantGradientNode(Node):
 
 class DelayOnceNode(Node):
     def __init__(self, parent=None):
-        Node.__init__(self, parent)
+        if parent:
+            Node.__init__(self, [parent])
+        else:
+            Node.__init__(self)
         
 class FunctionNode(Node):
-    def __init__(self, parents=None):
-        Node.__init__(self, parents)
+    def __init__(self, parent=None):
+        if parent:
+            Node.__init__(self, [parent])
+        else:
+            Node.__init__(self)
 
     def evaluate(self):
         if self.y is None:
@@ -212,4 +218,9 @@ class SigmoidCrossEntropyNode(BinaryOpNode):
     def compute_gradient(self, dJdy):
         return [-dJdy*(np.log(self.x[1]/(1-self.x[1]))), -dJdy*(self.x[0]/self.x[1]-(1-self.x[0])/(1-self.x[1]))]
 
-nodescal = ScalarMultiplicationNode()
+class SumNode(Node):
+    def compute_output(self):
+        return np.sum(self.x, axis=0)
+
+    def compute_gradient(self, dJdy):
+        return [dJdy for _ in self.parents]
