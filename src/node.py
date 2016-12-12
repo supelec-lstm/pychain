@@ -45,7 +45,7 @@ class InputNode(Node):
         Node.__init__(self)
         self.value = value
 
-    def set_value(self,value):
+    def set_value(self, value):
         self.value = value
 
     def evaluate(self):
@@ -167,6 +167,21 @@ class Norm2Node(FunctionNode):
 
     def compute_gradient(self, dJdy):
         return 2*self.x*dJdy
+
+class SelectionNode(FunctionNode):
+    def __init__(self, parent=None, start=0, end=0):
+        FunctionNode.__init__(self, parent)
+        self.start = start
+        self.end = end
+
+    def compute_output(self):
+        print(self.x, self.x[:,self.start:self.end])
+        return self.x[:,self.start:self.end]
+
+    def compute_gradient(self, dJdy):
+        gradient = np.zeros(self.x.shape)
+        gradient[:,self.start:self.end] = dJdy
+        return gradient
 
 class BinaryOpNode(Node):
     def __init__(self, parent1=None, parent2=None):

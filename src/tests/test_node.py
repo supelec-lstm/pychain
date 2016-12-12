@@ -131,6 +131,18 @@ def scalar_multiplication_node():
 	norm2_node.evaluate()
 	assert np.array_equal(scalar_node.get_gradient(0), 6*value)
 
+def test_selection_node():
+	value = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])	
+	input_node = InputNode(value)
+	selection_node = SelectionNode(input_node, 1, 3)
+	norm2_node = Norm2Node(selection_node)
+	output_node = ConstantGradientNode([norm2_node])
+
+	assert np.array_equal(selection_node.evaluate(), np.array([[2, 3], [6, 7]]))
+	norm2_node.evaluate()
+	print(selection_node.get_gradient(0))
+	assert np.array_equal(selection_node.get_gradient(0), np.array([[0, 4, 6, 0], [0, 12, 14, 0]]))
+
 def init_ones(shape):
 	return np.ones(shape)
 
@@ -204,7 +216,6 @@ def test_concatenate_node():
     assert np.array_equal(node_conca.get_gradient(0), np.array([[2, 2], [4, 4]]))
     assert np.array_equal(node_conca.get_gradient(1), np.array([[2, 4], [6, 8]]))
  
-
 def test_softmax_cross_entropy_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
