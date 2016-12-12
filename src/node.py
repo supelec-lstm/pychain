@@ -52,11 +52,10 @@ class InputNode(Node):
         return self.value
 
 class LearnableNode(Node):
-    def __init__(self, shape, init_function):
+    def __init__(self, w):
         Node.__init__(self)
-        self.shape = shape
-        self.w = init_function(self.shape)
-        self.acc_dJdw = np.zeros(self.shape)
+        self.w = w
+        self.acc_dJdw = np.zeros(self.w.shape)
 
     def compute_output(self):
         return self.w
@@ -69,7 +68,7 @@ class LearnableNode(Node):
         self.w -= (learning_rate/batch_size)*self.acc_dJdw
 
     def reset_accumulator(self):
-        self.acc_dJdw = np.zeros(self.shape)
+        self.acc_dJdw = np.zeros(self.w.shape)
 
 class ConstantGradientNode(Node):
     def __init__(self, parents):
@@ -197,7 +196,7 @@ class MultiplicationNode(BinaryOpNode):
     def compute_gradient(self, dJdy):
         return [np.dot(dJdy, self.x[1].T), np.dot(self.x[0].T, dJdy)]
 
-class ConcatenateNode(BinaryOpNode):
+class  ConcatenationNode(BinaryOpNode):
     def compute_output(self):
         return np.concatenate((self.x[0], self.x[1]), axis=1)
 

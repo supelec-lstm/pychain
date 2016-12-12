@@ -12,7 +12,7 @@ def init_ones(shape):
 
 def test_simple_graph():
 	input_node = InputNode()
-	weights_node = LearnableNode((3, 1), init_ones)
+	weights_node = LearnableNode(init_ones((3, 1)))
 	output_node = MultiplicationNode(input_node, weights_node)
 	expected_output_node = InputNode()
 	sub_node = SubstractionNode(output_node, expected_output_node)

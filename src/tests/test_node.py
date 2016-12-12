@@ -135,7 +135,7 @@ def init_ones(shape):
 	return np.ones(shape)
 
 def test_learnable_node():	
-	learnable_node = LearnableNode((3, 2), init_ones)
+	learnable_node = LearnableNode(init_ones((3, 2)))
 	norm2_node = Norm2Node(learnable_node)
 	output_node = ConstantGradientNode([norm2_node])
 
@@ -195,7 +195,7 @@ def test_multiplication_node():
 def test_concatenate_node():
     node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
     node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
-    node_conca = ConcatenateNode(node_in1, node_in2)
+    node_conca =  ConcatenationNode(node_in1, node_in2)
     node_fun = Norm2Node(node_conca)
     node_out = ConstantGradientNode([node_fun])
 
