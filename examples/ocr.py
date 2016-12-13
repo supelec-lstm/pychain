@@ -29,7 +29,7 @@ def get_predicted_class(predicted_y):
     return np.argmax(predicted_y, axis=1)
 
 def accuracy(graph, X, Y):
-    predicted_y = graph.propagate(X)
+    predicted_y = graph.propagate([X])[0]
     predicted_class = get_predicted_class(predicted_y)
     return np.sum(Y.flatten() == predicted_class) / Y.shape[0]
 
@@ -55,7 +55,7 @@ def fully_connected(layers):
     cur_input_node = input_node
     for i, size in enumerate(layers):
         bias_node = AddBiasNode(cur_input_node)
-        weights_node = LearnableNode((prev_size, size), init_function)
+        weights_node = LearnableNode(init_function((prev_size, size)))
         prod_node = MultiplicationNode(bias_node, weights_node)
         if i+1 < len(layers):
             cur_input_node = TanhNode(prod_node)
@@ -72,7 +72,7 @@ def fully_connected(layers):
     #cost_node = SigmoidCrossEntropyNode(expected_output_node, cur_input_node)
 
     nodes += [expected_output_node, cost_node]
-    return Graph(nodes, input_node, cur_input_node, expected_output_node, cost_node, learnable_nodes) 
+    return Graph(nodes, [input_node], [cur_input_node], [expected_output_node], cost_node, learnable_nodes) 
 
  # Functions to benchmark: "one example at a time" performance
 
@@ -80,15 +80,15 @@ def batch_gradient_descent_oe(graph, X, Y, i_start, i_end, learning_rate):
     total_cost = 0
     batch_size = i_end - i_start
     for x, y in zip(X[i_start:i_end], Y[i_start:i_end]):
-        graph.propagate(np.array([x]))
-        total_cost += graph.backpropagate(np.array([y]))
+        graph.propagate([np.array([x])])
+        total_cost += graph.backpropagate([np.array([y])])
     graph.descend_gradient(learning_rate, batch_size)
     return total_cost / batch_size
 
 def accuracy_oe(graph, X, Y):
     true_positive = 0
     for x, y in zip(X, Y):
-        predicted_y = graph.propagate(np.array([x]))
+        predicted_y = graph.propagate([np.array([x])])[0]
         predicted_class = get_predicted_class(predicted_y)
         true_positive += predicted_class == y
     return true_positive / Y.shape[0]
@@ -108,7 +108,7 @@ def benchmark(graph, X, Y, X_test, Y_test):
     start_time = time.time()
     for i in range(0, X.shape[0], batch_size):
         print(i)
-        print(graph.batch_gradient_descent(X[i:i+batch_size], ohe_Y[i:i+batch_size], learning_rate) / batch_size)
+        print(graph.batch_gradient_descent([X[i:i+batch_size]], [ohe_Y[i:i+batch_size]], learning_rate) / batch_size)
         if (i % 2048) == 0:
             print('ACCURACY TRAINING:', accuracy(graph, X, Y))
             print('ACCURACY TEST:', accuracy(graph, X_test, Y_test))
@@ -147,7 +147,7 @@ def benchmark_with_confidence_interval():
         for j in range(nb_times_datasets):
             for i in range(0, X.shape[0], batch_size):
                 print(i)
-                print(graph.batch_gradient_descent(X[i:i+batch_size], ohe_Y[i:i+batch_size], learning_rate) / batch_size)
+                print(graph.batch_gradient_descent([X[i:i+batch_size]], [ohe_Y[i:i+batch_size]], learning_rate) / batch_size)
         accuracies_test.append(accuracy(graph, X_test, Y_test))
         graph = fully_connected(layers)
     print(time.time() - start_time)
@@ -163,8 +163,8 @@ def cost_plots():
     for j in range(nb_times_datasets):
         for i in range(0, X.shape[0], batch_size):
             print(i)
-            print(graph.batch_gradient_descent(X[i:i+batch_size], ohe_Y[i:i+batch_size], learning_rate) / batch_size)
-            if (c % 128) == 0:
+            print(graph.batch_gradient_descent([X[i:i+batch_size]], [ohe_Y[i:i+batch_size]], learning_rate) / batch_size)
+            if (c % 32) == 0:
                 t.append(c)
                 accuracies_training.append(accuracy(graph, X, Y))
                 accuracies_test.append(accuracy(graph, X_test, Y_test))
@@ -200,7 +200,7 @@ def display_weights(W):
 
 if __name__ == '__main__':
     layers = [10]
-    batch_size = 32
+    batch_size = 128
     learning_rate = 1
     nb_times_datasets = 1
     graph = fully_connected(layers)
