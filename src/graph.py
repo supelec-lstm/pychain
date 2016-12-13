@@ -34,7 +34,7 @@ class Graph:
 	def batch_gradient_descent(self, X, Y, learning_rate):
 		self.propagate(X)
 		cost = self.backpropagate(Y)
-		self.descend_gradient(learning_rate, x.shape[0])
+		self.descend_gradient(learning_rate, X[0].shape[0])
 		return cost
 
 	def reset_memoization(self):
