@@ -184,7 +184,7 @@ def test_propagate1(graph3):
 	output = recurrent_graph.propagate([np.array([[2]]), np.array([[5]])])
 	assert output == [[np.array([[2]])], [np.array([[7]])]]
 
-	output = recurrent_graph.propagate([np.array([[2]]), np.array([[5]]), [np.array([[3]])]])
+	output = recurrent_graph.propagate([np.array([[2]]), np.array([[5]]), np.array([[3]])])
 	assert output == [[np.array([[2]])], [np.array([[7]])], [np.array([[10]])]]
 
 def test_backpropagate1(graph3):

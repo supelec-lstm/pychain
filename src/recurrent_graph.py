@@ -26,7 +26,7 @@ class RecurrentGraph:
 		outputs = []
 		for x in sequence:
 			output = graph.propagate([x] + hidden_state)
-			outputs.append(output[:-self.nb_hidden_nodes])
+			outputs += output[:-self.nb_hidden_nodes]
 			hidden_state = output[-self.nb_hidden_nodes:]
 		return outputs
 

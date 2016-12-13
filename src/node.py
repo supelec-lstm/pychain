@@ -24,7 +24,7 @@ class Node:
 
     def evaluate(self):
         if self.y is None:
-            self.x = np.array([parent.evaluate() for parent in self.parents])
+            self.x = [parent.evaluate() for parent in self.parents]
             self.y = self.compute_output()
         return self.y
 
@@ -175,7 +175,6 @@ class SelectionNode(FunctionNode):
         self.end = end
 
     def compute_output(self):
-        print(self.x, self.x[:,self.start:self.end])
         return self.x[:,self.start:self.end]
 
     def compute_gradient(self, dJdy):
@@ -216,7 +215,7 @@ class  ConcatenationNode(BinaryOpNode):
         return np.concatenate((self.x[0], self.x[1]), axis=1)
 
     def compute_gradient(self, dJdy):
-        return [dJdy[:,:len(self.x[0])], dJdy[:,len(self.x[0]):]]
+        return [dJdy[:,:self.x[0].shape[1]], dJdy[:,self.x[0].shape[1]:]]
 
 class SoftmaxCrossEntropyNode(BinaryOpNode):
     def compute_output(self):
