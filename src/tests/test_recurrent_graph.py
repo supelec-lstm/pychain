@@ -72,6 +72,24 @@ def graph4():
 		     sigmoid_node, expected_output, substraction_node, cost_node]
 	return Graph(nodes, [input_node], [sigmoid_node], [expected_output], cost_node, [learnable_node1, learnable_node2])
 
+@pytest.fixture
+def graph5():
+	# for the comparison with RTRL
+	input_node = InputNode()
+	delay_once_node = DelayOnceNode()
+	concatenation_node = ConcatenationNode(input_node, delay_once_node)
+	learnable_node = LearnableNode(init_ones((2, 1)))
+	multiplication_node = MultiplicationNode(concatenation_node, learnable_node)
+	sigmoid_node = SigmoidNode(multiplication_node)
+	expected_output = InputNode()
+	substraction_node = SubstractionNode(expected_output, sigmoid_node)
+	cost_node = Norm2Node(substraction_node)
+	# set the recurrence
+	delay_once_node.set_parents([sigmoid_node])
+	nodes = [input_node, delay_once_node, concatenation_node, learnable_node, \
+		     multiplication_node, sigmoid_node, expected_output, substraction_node, cost_node]
+	return Graph(nodes, [input_node], [sigmoid_node], [expected_output], cost_node, [learnable_node])
+
 def test_create_nodes1(graph1):
 	recurrent_graph = RecurrentGraph(graph1)
 	unfolded_graph, matchings = recurrent_graph.create_nodes(3)
@@ -306,3 +324,20 @@ def test_backpropagate3(graph4):
 	grad2_w1 = np.array([[5*u2, 5*u2], [np.tanh(2)*u2, np.tanh(2)*u2], [np.tanh(2)*u2, np.tanh(2)*u2]])
 	expected_w1 = np.ones((3, 2)) - 0.1 * (grad1_w1 + grad2_w1)
 	assert np.allclose(recurrent_graph.weights[0], expected_w1)
+
+def test_propagate3(graph5):
+	recurrent_graph = RecurrentGraph(graph5, [(1, 1)])
+	output = recurrent_graph.propagate([np.array([[1]]), np.array([[2]])])
+	output1 = sigmoid(1)
+	output2 = sigmoid(2 + sigmoid(1))
+	assert output == [np.array([[output1]]), np.array([[output2]])]
+
+def test_backpropagation4(graph5):
+	recurrent_graph = RecurrentGraph(graph5, [(1, 1)])
+	cost = recurrent_graph.backpropagate([np.array([[1]]), np.array([[2]])], [np.array([[2]]), np.array([[3]])], 1)
+	
+	expected_cost = 5.8586149168896
+	assert cost == expected_cost
+
+	expected_weights = np.array([[ 2.01896294], [ 1.17305715]])
+	assert np.allclose(recurrent_graph.weights, expected_weights)
