@@ -14,23 +14,23 @@ letters = ['B', 'T', 'P', 'S', 'X', 'V', 'E']
 letter_to_index = {letter: i for i, letter in enumerate(letters)}
 index_to_letter = {i: letter for i, letter in enumerate(letters)}
 
-nb_hidden_units = 12
+"""nb_hidden_units = 12
 train_path = '../reber-datasets/symmetrical_reber_train_2.4M.txt'
 test_path = '../reber-datasets/symmetrical_reber_test_1M.txt'
-automaton = symmetrical_reber.create_automaton(0.5)
+automaton = symmetrical_reber.create_automaton(0.5)"""
 
-"""nb_hidden_units = 2
+nb_hidden_units = 2
 train_path = '../reber-datasets/reber_train_2.4M.txt'
 test_path = '../reber-datasets/reber_test_1M.txt'
-automaton = reber.create_automaton()"""
+automaton = reber.create_automaton()
 
 def init_function(shape):
-    return (np.random.rand(*shape) - 1)
+    return (np.ones(shape))
 
 def string_to_sequence(string):
 	sequence = []
-	for i, letter in enumerate(string):
-		sequence.append(np.array([[1 if letter_to_index[string[i]] == j else 0 for j in range(7)]]))
+	for letter in string:
+		sequence.append(np.array([[1 if letter_to_index[letter] == j else 0 for j in range(7)]]))
 	return sequence
 
 def train_reber(graph, N):
@@ -40,6 +40,7 @@ def train_reber(graph, N):
 		if i % 1000 == 0:
 			print(i)
 		string = f.readline().strip()
+		print(string)
 		sequence = string_to_sequence(string)
 		cost = graph.backpropagate(sequence[0:-1], sequence[1:], learning_rate)
 	f.close()
@@ -106,9 +107,11 @@ def create_graph():
 
 if __name__ == '__main__':
 	graph = create_graph()
-	train_reber(graph, 200000)
+	train_reber(graph, 1)
+	print(graph.weights[0].shape)
+	print(graph.weights[0])
 	# Save the graph
-	pickle.dump(graph, open('reber.pickle', 'wb'))
-	graph = pickle.load(open('reber.pickle', 'rb'))
-	print(accuracy(graph, 10000))
-	print(accuracy_last_letter(graph, 10000))
+	#pickle.dump(graph, open('reber.pickle', 'wb'))
+	#graph = pickle.load(open('reber.pickle', 'rb'))
+	#print(accuracy(graph, 10000))
+	#print(accuracy_last_letter(graph, 10000))
