@@ -33,7 +33,7 @@ class RecurrentGraph:
 	def backpropagate(self, sequence, expected_sequence, learning_rate):
 		graph = self.unfold(len(sequence))
 		hidden_state = [np.zeros(shape) for shape in self.hidden_shapes]
-		graph.propagate(sequence + hidden_state)
+		outputs = graph.propagate(sequence + hidden_state)
 		cost = graph.backpropagate(expected_sequence)
 		graph.descend_gradient(learning_rate, 1)
 		self.weights = [node.w for node in graph.learnable_nodes]
@@ -44,10 +44,11 @@ class RecurrentGraph:
 		hidden_state = [np.zeros(shape) for shape in self.hidden_shapes]
 		costs = []
 		for i in range(0, len(sequence), batch_length):
-			output = graph.propagate(sequence[i:i+batch_length] + hidden_state)
-			hidden_state = output[-self.nb_hidden_nodes:]
-			costs.append(graph.backpropagate(expected_sequence[i:i+batch_length]))
-			graph.descend_gradient(learning_rate, 1)
+			if(i + batch_length <= len(sequence)):
+				output = graph.propagate(sequence[i:i+batch_length] + hidden_state)
+				hidden_state = output[-self.nb_hidden_nodes:]
+				costs.append(graph.backpropagate(expected_sequence[i:i+batch_length]))
+				graph.descend_gradient(learning_rate, 1)
 		self.weights = [node.w for node in graph.learnable_nodes]
 		return costs
 
