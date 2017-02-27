@@ -10,7 +10,7 @@ class Graph:
 		self.learnable_nodes = learnable_nodes
 
 		# Create a constant gradient neuron
-		ConstantGradientNode([cost_node])
+		OutputNode([cost_node])
 
 	def propagate(self, X):
 		self.reset_memoization()

@@ -70,12 +70,13 @@ class LearnableNode(Node):
     def reset_accumulator(self):
         self.acc_dJdw = np.zeros(self.w.shape)
 
-class ConstantGradientNode(Node):
-    def __init__(self, parents):
+class OutputNode(Node):
+    def __init__(self, parents, value=1):
         Node.__init__(self, parents)
+        self.value = value
 
     def get_gradient(self, i_child):
-        return 1
+        return self.value
 
 class DelayOnceNode(Node):
     def __init__(self, parent=None):
