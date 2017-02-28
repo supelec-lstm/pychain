@@ -22,12 +22,14 @@ def test_add_parents():
 	assert node2.children == [(node3, 1)]
 
 def test_input_node():
-	value = np.array([[1,1,1],[2,2,2]])
+	value = np.array([[1, 1, 1], [2, 2, 2]])
 	input_node = InputNode(value)
 	assert np.array_equal(input_node.evaluate(), value)
 
-	value = np.array([4,2])
+	input_node.reset_memoization()
+	value = np.array([[4, 2]])
 	input_node.set_value(value)
+	print(input_node.evaluate())
 	assert np.array_equal(input_node.evaluate(), value)
 
 def test_output_node():
@@ -55,10 +57,16 @@ def test_add_bias_node():
 	assert norm2_node.evaluate() == 94
 	assert np.array_equal(add_bias_node.get_gradient(0), 2*value)
 
-def test_delay_once_node():
-    value = np.array([[1, 2], [3, 4], [5, 6]])	
-    input_node = InputNode(value)
-    delay_once_node = DelayOnceNode(input_node)
+def test_identity_node():
+	value = np.array([[1, 2], [3, 4], [5, 6]])		
+	input_node = InputNode(value)
+	id_node = IdentityNode(input_node)
+	norm2_node = Norm2Node(id_node)
+	output_node = GradientInputNode([norm2_node])
+
+	assert np.array_equal(id_node.evaluate(), value)
+	norm2_node.evaluate()
+	assert np.allclose(id_node.get_gradient(0), 2*value)
 
 def test_sigmoid_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])		
@@ -203,6 +211,18 @@ def test_multiplication_node():
 	node_fun.evaluate()
 	assert np.array_equal(node_dot.get_gradient(0), np.array([[32, 72], [64, 144]]))
 	assert np.array_equal(node_dot.get_gradient(1), np.array([[40, 60], [40, 60]]))
+
+def test_ew_multiplication_node():
+	node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
+	node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
+	node_dot = EWMultiplicationNode(node_in1, node_in2)
+	node_fun = Norm2Node(node_dot)
+	node_out = GradientInputNode([node_fun])
+
+	assert np.array_equal(node_dot.evaluate(), np.array([[1, 2], [6, 8]]))
+	node_fun.evaluate()
+	assert np.array_equal(node_dot.get_gradient(0), np.array([[2, 8], [36, 64]]))
+	assert np.array_equal(node_dot.get_gradient(1), np.array([[2, 4], [24, 32]]))
 
 def test_concatenate_node():
     node_in1 = InputNode(np.array([[1, 1], [2, 2]]))

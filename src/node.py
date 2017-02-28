@@ -120,6 +120,13 @@ class AddBiasNode(FunctionNode):
     def compute_gradient(self):
         return self.dJdy[:,1:]
 
+class IdentityNode(FunctionNode):
+    def compute_output(self):
+        return self.x
+
+    def compute_gradient(self):
+        return self.dJdy
+
 class SigmoidNode(FunctionNode):
     def compute_output(self):
         return 1 / (1 + np.exp(-self.x))
@@ -167,7 +174,7 @@ class ScalarMultiplicationNode(FunctionNode):
         return self.scalar * self.dJdy
 
     def clone(self):
-        return ScalarMultiplicationNode(None, self.scalar)
+        return ScalarMultiplicationNode(scalar=self.scalar)
 
 class Norm2Node(FunctionNode):
     def compute_output(self):
@@ -220,6 +227,14 @@ class MultiplicationNode(BinaryOpNode):
 
     def compute_gradient(self):
         return [np.dot(self.dJdy, self.x[1].T), np.dot(self.x[0].T, self.dJdy)]
+
+# Element wise multiplication
+class EWMultiplicationNode(BinaryOpNode):
+    def compute_output(self):
+        return self.x[0] * self.x[1]
+
+    def compute_gradient(self):
+        return [self.dJdy*self.x[1], self.dJdy*self.x[0]]
 
 class  ConcatenationNode(BinaryOpNode):
     def compute_output(self):

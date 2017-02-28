@@ -1,4 +1,4 @@
-import node
+from node import *
 
 class CompositeNode(Node):
 	def __init__(self, nodes, input_nodes, output_nodes, learnable_nodes):
