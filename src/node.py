@@ -51,16 +51,25 @@ class InputNode(Node):
     def set_value(self, value):
         self.value = value
 
-    def evaluate(self):
+    def compute_output(self):
         return self.value
+
+    def compute_gradient(self):
+        return self.dJdy
 
 class GradientInputNode(Node):
     def __init__(self, parents, value=1):
         Node.__init__(self, parents)
         self.value = value
 
-    def get_gradient(self, i_child):
-        return self.value
+    def set_value(self, value):
+        self.value = value
+
+    def compute_output(self):
+        return self.x
+
+    def compute_gradient(self):
+        return [self.value]
 
 class LearnableNode(Node):
     def __init__(self, w):
@@ -83,13 +92,6 @@ class LearnableNode(Node):
 
     def clone(self):
         return LearnableNode(self.w)
-
-class DelayOnceNode(Node):
-    def __init__(self, parent=None):
-        if parent:
-            Node.__init__(self, [parent])
-        else:
-            Node.__init__(self)
         
 class FunctionNode(Node):
     def __init__(self, parent=None):
