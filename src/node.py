@@ -228,11 +228,6 @@ class BinaryOpNode(Node):
 
     def get_gradient(self, i_child_input=0):
         if self.dJdx is None:
-            """print(self)
-            print(self.children[0])
-            print(self.children[0][0][0].get_gradient())
-            print(np.sum(child.get_gradient(i) for child, i in self.children[0]))
-            print()"""
             self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children[0])
             self.dJdx = self.compute_gradient()
         return self.dJdx[i_child_input]
@@ -256,9 +251,6 @@ class MultiplicationNode(BinaryOpNode):
         return np.dot(self.x[0], self.x[1])
 
     def compute_gradient(self):
-        """print(self.dJdy)
-        print(self.x)
-        print(self.children)"""
         return [np.dot(self.dJdy, self.x[1].T), np.dot(self.x[0].T, self.dJdy)]
 
 # Element wise multiplication
@@ -267,10 +259,6 @@ class EWMultiplicationNode(BinaryOpNode):
         return self.x[0] * self.x[1]
 
     def compute_gradient(self):
-        print(self.x)
-        print(self.dJdy)
-        print(self.children)
-        print()
         return [self.dJdy*self.x[1], self.dJdy*self.x[0]]
 
 class  ConcatenationNode(BinaryOpNode):
