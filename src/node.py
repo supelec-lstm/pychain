@@ -91,6 +91,7 @@ class LearnableNode(Node):
         self.acc_dJdw = np.zeros(self.w.shape)
 
     def clone(self):
+        # The weights are always shared between the clones
         return LearnableNode(self.w)
         
 class FunctionNode(Node):

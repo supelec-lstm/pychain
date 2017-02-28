@@ -58,7 +58,6 @@ class Layer:
 
 	def clone(self):
 		# Create containers for nodes
-		# We clone the nodes but not the weights
 		nodes = []
 		input_nodes = []
 		output_nodes = []
