@@ -2,7 +2,9 @@ import numpy as np
 
 class Node:
     def __init__(self, parents=None):
+        # Parents for each input
         self.set_parents(parents or [])
+        # Children for each output
         self.children = []
 
         self.x = None
@@ -13,15 +15,15 @@ class Node:
         self.parents = []
         for i, pair in enumerate(parents):
             parent = None
-            i_output = 0
+            i_parent_output = 0
             # Check if an output is given
             if type(pair) == tuple:
-                parent, i_output = pair
+                parent, i_parent_output = pair
             # Else only a node is given
             else:
                 parent = pair
-            self.parents.append((parent, i_output))
-            parent.add_child(self, i, i_output)
+            self.parents.append((parent, i_parent_output))
+            parent.add_child(self, i, i_parent_output)
         
     def add_child(self, child, i_child_input, i_output):
         if(i_output >= len(self.children)):
@@ -35,9 +37,9 @@ class Node:
 
     def evaluate(self, i_output=0):
         if self.y is None:
-            self.x = [parent.evaluate(i_output) for (parent, i_output) in self.parents]
+            self.x = [parent.evaluate(i_parent_output) for (parent, i_parent_output) in self.parents]
             self.y = self.compute_output()
-        return self.y
+        return self.y[i_output]
 
     def compute_output(self):
         raise NotImplementedError()
@@ -89,11 +91,11 @@ class LearnableNode(Node):
         self.acc_dJdw = np.zeros(self.w.shape)
 
     def compute_output(self):
-        return self.w
+        return [self.w]
 
     def compute_gradient(self):
         self.acc_dJdw += self.dJdy[0]
-        return self.dJdy[0]
+        return self.dJdy
 
     def descend_gradient(self, learning_rate, batch_size):
         self.w -= (learning_rate/batch_size)*self.acc_dJdw
@@ -114,7 +116,7 @@ class FunctionNode(Node):
 
     def evaluate(self, i_output=0):
         if self.y is None:
-            self.x = self.parents[0][0].evaluate()
+            self.x = self.parents[0][0].evaluate(self.parents[0][1])
             self.y = self.compute_output()
         return self.y
 
@@ -220,12 +222,17 @@ class BinaryOpNode(Node):
 
     def evaluate(self, i_output=0):
         if self.y is None:
-            self.x = [self.parents[0][0].evaluate(), self.parents[1][0].evaluate()]
+            self.x = [parent.evaluate(i_parent_output) for (parent, i_parent_output) in self.parents]
             self.y = self.compute_output()
         return self.y
 
     def get_gradient(self, i_child_input=0):
         if self.dJdx is None:
+            """print(self)
+            print(self.children[0])
+            print(self.children[0][0][0].get_gradient())
+            print(np.sum(child.get_gradient(i) for child, i in self.children[0]))
+            print()"""
             self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children[0])
             self.dJdx = self.compute_gradient()
         return self.dJdx[i_child_input]
@@ -249,6 +256,9 @@ class MultiplicationNode(BinaryOpNode):
         return np.dot(self.x[0], self.x[1])
 
     def compute_gradient(self):
+        """print(self.dJdy)
+        print(self.x)
+        print(self.children)"""
         return [np.dot(self.dJdy, self.x[1].T), np.dot(self.x[0].T, self.dJdy)]
 
 # Element wise multiplication
@@ -257,6 +267,10 @@ class EWMultiplicationNode(BinaryOpNode):
         return self.x[0] * self.x[1]
 
     def compute_gradient(self):
+        print(self.x)
+        print(self.dJdy)
+        print(self.children)
+        print()
         return [self.dJdy*self.x[1], self.dJdy*self.x[0]]
 
 class  ConcatenationNode(BinaryOpNode):
@@ -282,7 +296,7 @@ class SigmoidCrossEntropyNode(BinaryOpNode):
 
 class SumNode(Node):
     def compute_output(self):
-        return np.sum(self.x, axis=0)
+        return [np.sum(self.x, axis=0)]
 
     def compute_gradient(self):
         return [self.dJdy[0] for _ in self.parents]
