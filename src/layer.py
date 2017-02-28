@@ -89,7 +89,7 @@ class Layer:
 			keyToNode[node.key] = new_node
 		# Create the links between nodes
 		for (node, new_node) in zip(self.nodes, nodes):
-			new_node.set_parents([keyToNode[parent.key] for parent in node.parents])
+			new_node.set_parents([keyToNode[parent.key] for parent, _ in node.parents])
 		# Return a new layer
 		return Layer(nodes, input_nodes, output_nodes, hidden_input_nodes, hidden_output_nodes, \
 			expected_output_nodes, cost_node, learnable_nodes)

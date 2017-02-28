@@ -17,7 +17,7 @@ def test_add_parents():
 	node2 = Node()
 	node3 = Node()
 	node3.set_parents([node1, node2])
-	assert node3.parents == [node1, node2]
+	assert node3.parents == [(node1, 0), (node2, 0)]
 	assert node1.children == [(node3, 0)]
 	assert node2.children == [(node3, 1)]
 

@@ -10,8 +10,17 @@ class Node:
         self.dJdx = None
 
     def set_parents(self, parents):
-        self.parents = parents
-        for i, parent in enumerate(self.parents):
+        self.parents = []
+        for i, pair in enumerate(parents):
+            parent = None
+            i_output = 0
+            # Check if an output is given
+            if type(pair) == tuple:
+                parent, i_output = pair
+            # Else only a node is given
+            else:
+                parent = pair
+            self.parents.append((parent, i_output))
             parent.add_child(self, i)
         
     def add_child(self, child, i_child):
@@ -22,16 +31,16 @@ class Node:
         self.y = None
         self.dJdx = None
 
-    def evaluate(self):
+    def evaluate(self, i_output=0):
         if self.y is None:
-            self.x = [parent.evaluate() for parent in self.parents]
+            self.x = [parent.evaluate(i_output) for (parent, i_output) in self.parents]
             self.y = self.compute_output()
         return self.y
 
     def compute_output(self):
         raise NotImplementedError()
 
-    def get_gradient(self, i_child):
+    def get_gradient(self, i_child=0):
         if self.dJdx is None:
             self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children)
             self.dJdx = self.compute_gradient()
@@ -101,13 +110,13 @@ class FunctionNode(Node):
         else:
             Node.__init__(self)
 
-    def evaluate(self):
+    def evaluate(self, i_output=0):
         if self.y is None:
-            self.x = self.parents[0].evaluate()
+            self.x = self.parents[0][0].evaluate()
             self.y = self.compute_output()
         return self.y
 
-    def get_gradient(self, i_child):
+    def get_gradient(self, i_child=0):
         if self.dJdx is None:
             self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children)
             self.dJdx = self.compute_gradient()
