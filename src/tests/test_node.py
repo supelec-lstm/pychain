@@ -10,7 +10,7 @@ def test_add_child():
 	node1 = Node()
 	node2 = Node([node1])
 	node3 = Node([node1])
-	assert node1.children == [(node2, 0), (node3, 0)]
+	assert node1.children == [[(node2, 0), (node3, 0)]]
 
 def test_add_parents():
 	node1 = Node()
@@ -18,8 +18,8 @@ def test_add_parents():
 	node3 = Node()
 	node3.set_parents([node1, node2])
 	assert node3.parents == [(node1, 0), (node2, 0)]
-	assert node1.children == [(node3, 0)]
-	assert node2.children == [(node3, 1)]
+	assert node1.children == [[(node3, 0)]]
+	assert node2.children == [[(node3, 1)]]
 
 def test_input_node():
 	value = np.array([[1, 1, 1], [2, 2, 2]])
@@ -184,6 +184,7 @@ def test_addition_node():
 	y = np.array([[2, 3], [5, 6], [8, 9]])
 	assert np.array_equal(node_add.evaluate(), y)
 	node_fun.evaluate()
+	print(node_add.get_gradient(0))
 	assert np.array_equal(node_add.get_gradient(0), 2*y)
 	assert np.array_equal(node_add.get_gradient(1), 2*y)
 

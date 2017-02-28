@@ -21,10 +21,12 @@ class Node:
             else:
                 parent = pair
             self.parents.append((parent, i_output))
-            parent.add_child(self, i)
+            parent.add_child(self, i, i_output)
         
-    def add_child(self, child, i_child):
-        self.children.append((child, i_child))
+    def add_child(self, child, i_child_input, i_output):
+        if(i_output >= len(self.children)):
+            self.children += [[] for _ in range(i_output - len(self.children) + 1)]
+        self.children[i_output].append((child, i_child_input))
 
     def reset_memoization(self):
         self.x = None
@@ -40,11 +42,11 @@ class Node:
     def compute_output(self):
         raise NotImplementedError()
 
-    def get_gradient(self, i_child=0):
+    def get_gradient(self, i_child_input=0):
         if self.dJdx is None:
-            self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children)
+            self.dJdy = [np.sum(child.get_gradient(i) for child, i in children) for children in self.children]
             self.dJdx = self.compute_gradient()
-        return self.dJdx[i_child]
+        return self.dJdx[i_child_input]
 
     def compute_gradient(self):
         raise NotImplementedError()
@@ -60,7 +62,7 @@ class InputNode(Node):
     def set_value(self, value):
         self.value = value
 
-    def compute_output(self):
+    def evaluate(self, i_output=0):
         return self.value
 
     def compute_gradient(self):
@@ -77,8 +79,8 @@ class GradientInputNode(Node):
     def compute_output(self):
         return self.x
 
-    def compute_gradient(self):
-        return [self.value]
+    def get_gradient(self, i_child_input=0):
+        return self.value
 
 class LearnableNode(Node):
     def __init__(self, w):
@@ -90,8 +92,8 @@ class LearnableNode(Node):
         return self.w
 
     def compute_gradient(self):
-        self.acc_dJdw += self.dJdy
-        return self.dJdy
+        self.acc_dJdw += self.dJdy[0]
+        return self.dJdy[0]
 
     def descend_gradient(self, learning_rate, batch_size):
         self.w -= (learning_rate/batch_size)*self.acc_dJdw
@@ -116,9 +118,9 @@ class FunctionNode(Node):
             self.y = self.compute_output()
         return self.y
 
-    def get_gradient(self, i_child=0):
+    def get_gradient(self, i_child_input=0):
         if self.dJdx is None:
-            self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children)
+            self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children[0])
             self.dJdx = self.compute_gradient()
         return self.dJdx
 
@@ -216,6 +218,18 @@ class BinaryOpNode(Node):
         else:
             Node.__init__(self, [parent1, parent2])
 
+    def evaluate(self, i_output=0):
+        if self.y is None:
+            self.x = [self.parents[0][0].evaluate(), self.parents[1][0].evaluate()]
+            self.y = self.compute_output()
+        return self.y
+
+    def get_gradient(self, i_child_input=0):
+        if self.dJdx is None:
+            self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children[0])
+            self.dJdx = self.compute_gradient()
+        return self.dJdx[i_child_input]
+
 class AdditionNode(BinaryOpNode):
     def compute_output(self):
         return self.x[0] + self.x[1]
@@ -271,4 +285,4 @@ class SumNode(Node):
         return np.sum(self.x, axis=0)
 
     def compute_gradient(self):
-        return [self.dJdy for _ in self.parents]
+        return [self.dJdy[0] for _ in self.parents]
