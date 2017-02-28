@@ -63,22 +63,14 @@ class RecurrentGraph:
 		# Remember matchings
 		matchings = [{} for _ in range(k)]
 		# Fill the lists
-		# Copy the learnables nodes
-		for node, weight in zip(self.graph.learnable_nodes, self.weights):
-			new_node = LearnableNode(weight)
-			learnable_nodes.append(new_node)
-			nodes.append(new_node)
-			for i in range(k):
-				matchings[i][node.key] = new_node
 		# Replicate the other nodes k times
 		for i in range(k):
 			for node in self.graph.nodes:
-				if node in self.graph.learnable_nodes or type(node) == DelayOnceNode:
+				if type(node) == DelayOnceNode:
 					continue
-				if type(node) == SelectionNode:
-					new_node = SelectionNode(None, node.start, node.end)
-				else:
-					new_node = type(node)()
+				new_node = node.clone()
+				if node in self.graph.learnable_nodes:
+					learnable_nodes.append(new_node)
 				if node in self.graph.input_nodes:
 					input_nodes.append(new_node)
 				if node in self.graph.output_nodes:

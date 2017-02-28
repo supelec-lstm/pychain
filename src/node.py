@@ -40,6 +40,9 @@ class Node:
     def compute_gradient(self):
         raise NotImplementedError()
 
+    def clone(self):
+        return type(self)()
+
 class InputNode(Node):
     def __init__(self, value=None):
         Node.__init__(self)
@@ -51,7 +54,7 @@ class InputNode(Node):
     def evaluate(self):
         return self.value
 
-class OutputNode(Node):
+class GradientInputNode(Node):
     def __init__(self, parents, value=1):
         Node.__init__(self, parents)
         self.value = value
@@ -77,6 +80,9 @@ class LearnableNode(Node):
 
     def reset_accumulator(self):
         self.acc_dJdw = np.zeros(self.w.shape)
+
+    def clone(self):
+        return LearnableNode(self.w)
 
 class DelayOnceNode(Node):
     def __init__(self, parent=None):
@@ -157,6 +163,9 @@ class ScalarMultiplicationNode(FunctionNode):
     def compute_gradient(self):
         return self.scalar * self.dJdy
 
+    def clone(self):
+        return ScalarMultiplicationNode(None, self.scalar)
+
 class Norm2Node(FunctionNode):
     def compute_output(self):
         return np.sum(np.square(self.x))
@@ -177,6 +186,9 @@ class SelectionNode(FunctionNode):
         gradient = np.zeros(self.x.shape)
         gradient[:,self.start:self.end] = self.dJdy
         return gradient
+
+    def clone(self):
+        return SelectionNode(start=self.start, end=self.end)
 
 class BinaryOpNode(Node):
     def __init__(self, parent1=None, parent2=None):

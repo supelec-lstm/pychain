@@ -90,7 +90,7 @@ def graph5():
 		     multiplication_node, sigmoid_node, expected_output, substraction_node, cost_node]
 	return Graph(nodes, [input_node], [sigmoid_node], [expected_output], cost_node, [learnable_node])
 
-def test_create_nodes1(graph1):
+"""def test_create_nodes1(graph1):
 	recurrent_graph = RecurrentGraph(graph1)
 	unfolded_graph, matchings = recurrent_graph.create_nodes(3)
 	nodes = unfolded_graph.nodes
@@ -253,7 +253,7 @@ def test_create_links4(graph4):
 	# cost
 	assert nodes[20].parents == [nodes[10], nodes[19]]
 	# hidden nodes
-	assert nodes[21].parents == [] and nodes[21].children == [(nodes[3], 1)]
+	assert nodes[21].parents == [] and nodes[21].children == [(nodes[3], 1)]"""
 
 def test_weights(graph3):
 	recurrent_graph = RecurrentGraph(graph3)
