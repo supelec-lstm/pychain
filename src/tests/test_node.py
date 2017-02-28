@@ -276,5 +276,4 @@ def test_sum_node():
 	node_sum = SumNode([node_in1, node_in2, node_in3])
 	node_out = GradientInputNode([node_sum])
 	assert node_sum.evaluate() == 6
-	print(node_sum.get_gradient(0))
 	assert node_sum.get_gradient(0) == 1

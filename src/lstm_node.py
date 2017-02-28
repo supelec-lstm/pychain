@@ -2,41 +2,47 @@ from node import *
 from composite_node import *
 
 class LSTMNode(CompositeNode):
-	def __init__(self, dim_s, dim_y):
-		# Create input nodes
-		x = InputNode()
-		h_in = InputNode()
-		s_in = InputNode()
+	def __init__(self, dim_x, dim_s):
+		# Save the dimensions
+		self.dim_x = dim_x
+		self.dim_s = dim_s
 
-		# Define y the concatenation of h and x
-		y = ConcatenationNode(h, x)
-		dim_y = dim_s + dim_x
+		# Create input nodes
+		self.x = InputNode()
+		self.h_in = InputNode()
+		self.s_in = InputNode()
+
+		# Define c the concatenation of h and x
+		self.c = ConcatenationNode(self.h_in, self.x)
+		self.dim_c = self.dim_s + self.dim_x
 
 		# g
-		wg = LearnableNode(np.random.randn(dim_y, dim_s))
-		mg = MultiplicationNode(y, wg)
-		g = SigmoidNode(mg)
+		self.wg = LearnableNode(np.random.randn(self.dim_c, self.dim_s))
+		self.mg = MultiplicationNode(self.c, self.wg)
+		self.g = SigmoidNode(self.mg)
 
 		# i
-		wi = LearnableNode(np.random.rand(dim_y, dim_s))
-		mi = MultiplicationNode(y, wi)
-		i = TanhNode(mi)
+		self.wi = LearnableNode(np.random.rand(self.dim_c, self.dim_s))
+		self.mi = MultiplicationNode(self.c, self.wi)
+		self.i = TanhNode(self.mi)
 
 		# Define a what we add to s
-		a = EWMultiplicationNode(g, i)
-		s_out = AdditionNode(s_in, a)
+		self.a = EWMultiplicationNode(self.g, self.i)
+		self.s_out = AdditionNode(self.s_in, self.a)
 
 		# l
-		l = TanhNode(s_out)
+		self.l = TanhNode(self.s_out)
 
 		# o
-		wo = LearnableNode(np.random.rand(dim_y, dim_s))
-		mo = MultiplicationNode(y, wo)
-		o = SigmoidNode(mo)
+		self.wo = LearnableNode(np.random.rand(self.dim_c, self.dim_s))
+		self.mo = MultiplicationNode(self.c, self.wo)
+		self.o = SigmoidNode(self.mo)
 
 		# Compute h_out
-		h_out = EWMultiplicationNode(l, o)
+		self.h_out = EWMultiplicationNode(self.l, self.o)
 
 		# Call the constructor of CompositeNode
-		nodes = [x, h_in, s_in, y, wg, mg, g, wi, mi, i, a, s_out, l, wo, mo, o, h_out]
-		CompositeNode(nodes, [x, h_in, s_in], [h_out, s_out], [wg, wi, wo])
+		nodes = [self.x, self.h_in, self.s_in, self.c, self.wg, self.mg, self.g, self.wi, self.mi, \
+			self.i, self.a, self.s_out, self.l, self.wo, self.mo, self.o, self.h_out]
+		CompositeNode.__init__(self, nodes, [self.x, self.h_in, self.s_in], [self.h_out, self.s_out], \
+			[self.wg, self.wi, self.wo])
