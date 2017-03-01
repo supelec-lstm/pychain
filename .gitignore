@@ -5,7 +5,8 @@ __pycache__/
 *.pickle
 
 # Examples
-examples
+examples/*
+!examples/*.py
 
 # Temporary files
 *.out
