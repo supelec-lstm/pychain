@@ -51,45 +51,36 @@ class Layer:
 	def descend_gradient(self, learning_rate):
 		for node in self.learnable_nodes:
 			node.descend_gradient(learning_rate, 1)
+		# Reset accumulators
+		self.reset_accumulators()
 
 	def reset_memoization(self):
 		for node in self.learnable_nodes:
 			node.reset_memoization()
 
+	def reset_accumulators(self):
+		for node in self.learnable_nodes:
+			node.reset_accumulator()
+
 	def clone(self):
-		# Create containers for nodes
-		nodes = []
-		input_nodes = []
-		output_nodes = []
-		hidden_input_nodes = []
-		hidden_output_nodes = []
-		expected_output_nodes = []
-		cost_node = None
-		learnable_nodes = []
 		# Duplicate nodes
+		nodes = []
 		keyToNode = {}
 		for node in self.nodes:
 			new_node = node.clone()
-			# Append the nodes to the right container
-			if node in self.input_nodes:
-				input_nodes.append(new_node)
-			if node in self.output_nodes:
-				output_nodes.append(new_node)
-			if node in self.hidden_input_nodes:
-				hidden_input_nodes.append(new_node)
-			if node in self.hidden_output_nodes:
-				hidden_output_nodes.append(new_node)
-			if node in self.expected_output_nodes:
-				expected_output_nodes.append(new_node)
-			if node == self.cost_node:
-				cost_node = new_node
-			if node in self.learnable_nodes:
-				learnable_nodes.append(new_node)
 			nodes.append(new_node)
 			keyToNode[node.key] = new_node
+		# Append the nodes to the right container
+		input_nodes = [keyToNode[node.key] for node in self.input_nodes]
+		output_nodes = [keyToNode[node.key] for node in self.output_nodes]
+		hidden_input_nodes = [keyToNode[node.key] for node in self.hidden_input_nodes]
+		hidden_output_nodes = [keyToNode[node.key] for node in self.hidden_output_nodes]
+		expected_output_nodes = [keyToNode[node.key] for node in self.expected_output_nodes]
+		cost_node = keyToNode[self.cost_node.key]
+		learnable_nodes = [keyToNode[node.key] for node in self.learnable_nodes]
 		# Create the links between nodes
 		for (node, new_node) in zip(self.nodes, nodes):
-			new_node.set_parents([keyToNode[parent.key] for parent, _ in node.parents])
+			new_node.set_parents([(keyToNode[parent.key], i_output) for parent, i_output in node.parents])
 		# Return a new layer
 		return Layer(nodes, input_nodes, output_nodes, hidden_input_nodes, hidden_output_nodes, \
 			expected_output_nodes, cost_node, learnable_nodes)

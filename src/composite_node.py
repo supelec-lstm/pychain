@@ -1,8 +1,8 @@
 from node import *
 
-class CompositeNode(Node):
-    def __init__(self, nodes, input_nodes, output_nodes, learnable_nodes):
-        Node.__init__(self)
+class CompositeNode(LearnableNode):
+    def __init__(self, nodes, input_nodes, output_nodes, learnable_nodes, parents=None):
+        Node.__init__(self, parents)
         self.nodes = nodes
         self.input_nodes = input_nodes
         self.output_nodes = output_nodes
@@ -10,6 +10,10 @@ class CompositeNode(Node):
 
         # Create GradientInputNode to backpropagate gradient
         self.gradient_input_nodes = [GradientInputNode([node]) for node in self.output_nodes]
+
+        # Give a key to each node
+        for i, node in enumerate(self.nodes):
+            node.key = i
 
     def compute_output(self):
         # Set the input nodes values
@@ -36,28 +40,25 @@ class CompositeNode(Node):
         for node in self.learnable_nodes:
             node.reset_memoization()
 
+    def reset_accumulator(self):
+        for node in self.learnable_nodes:
+            node.reset_accumulator()
+
     def clone(self):
-        # Create containers for nodes
-        nodes = []
-        input_nodes = []
-        output_nodes = []
-        learnable_nodes = []
         # Duplicate nodes
+        nodes = []
         keyToNode = {}
         for node in self.nodes:
             new_node = node.clone()
-            # Append the nodes to the right container
-            if node in self.input_nodes:
-                input_nodes.append(new_node)
-            if node in self.output_nodes:
-                output_nodes.append(new_node)
-            if node in self.learnable_nodes:
-                learnable_nodes.append(new_node)
             nodes.append(new_node)
             keyToNode[node.key] = new_node
+        # Append the nodes to the right container
+        input_nodes = [keyToNode[node.key] for node in self.input_nodes]
+        output_nodes = [keyToNode[node.key] for node in self.output_nodes]
+        learnable_nodes = [keyToNode[node.key] for node in self.learnable_nodes]
         # Create the links between nodes
         for (node, new_node) in zip(self.nodes, nodes):
-            new_node.set_parents([keyToNode[parent.key] for parent in node.parents])
+            new_node.set_parents([(keyToNode[parent.key], i_output) for parent, i_output in node.parents])
         # Return a new composite node
         return CompositeNode(nodes, input_nodes, output_nodes, learnable_nodes)
 
