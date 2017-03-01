@@ -35,9 +35,9 @@ class Node:
         self.y = None
         self.dJdx = None
 
-    def evaluate(self, i_output=0):
+    def get_output(self, i_output=0):
         if self.y is None:
-            self.x = [parent.evaluate(i_parent_output) for (parent, i_parent_output) in self.parents]
+            self.x = [parent.get_output(i_parent_output) for (parent, i_parent_output) in self.parents]
             self.y = self.compute_output()
         return self.y[i_output]
 
@@ -64,7 +64,7 @@ class InputNode(Node):
     def set_value(self, value):
         self.value = value
 
-    def evaluate(self, i_output=0):
+    def get_output(self, i_output=0):
         return self.value
 
     def compute_gradient(self):
@@ -114,9 +114,9 @@ class FunctionNode(Node):
         else:
             Node.__init__(self)
 
-    def evaluate(self, i_output=0):
+    def get_output(self, i_output=0):
         if self.y is None:
-            self.x = self.parents[0][0].evaluate(self.parents[0][1])
+            self.x = self.parents[0][0].get_output(self.parents[0][1])
             self.y = self.compute_output()
         return self.y
 
@@ -220,9 +220,9 @@ class BinaryOpNode(Node):
         else:
             Node.__init__(self, [parent1, parent2])
 
-    def evaluate(self, i_output=0):
+    def get_output(self, i_output=0):
         if self.y is None:
-            self.x = [parent.evaluate(i_parent_output) for (parent, i_parent_output) in self.parents]
+            self.x = [parent.get_output(i_parent_output) for (parent, i_parent_output) in self.parents]
             self.y = self.compute_output()
         return self.y
 

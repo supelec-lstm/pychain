@@ -21,7 +21,7 @@ class Layer:
 		for i, node in enumerate(self.nodes):
 			node.key = i
 
-	def evaluate(self, X, H_in):
+	def get_output(self, X, H_in):
 		# Set the input nodes values
 		for node, x in zip(self.input_nodes, X):
 			node.set_value(x)
@@ -29,15 +29,15 @@ class Layer:
 		for node, h_in in zip(self.hidden_input_nodes, H_in):
 			node.set_value(h_in)
 		# Propagate
-		return [node.evaluate() for node in self.output_nodes], \
-			[node.evaluate() for node in self.hidden_output_nodes]
+		return [node.get_output() for node in self.output_nodes], \
+			[node.get_output() for node in self.hidden_output_nodes]
 
 	def get_gradient(self, Y, dJdH_out):
 		# Set the expected output nodes values
 		for node, y, in zip(self.expected_output_nodes, Y):
 			node.set_value(y)
 		# Compute the cost
-		cost = self.cost_node.evaluate()
+		cost = self.cost_node.get_output()
 		# Set the gradient nodes values
 		for node, dJdh_out in zip(self.gradient_input_nodes, dJdH_out):
 			node.set_value(dJdh_out)

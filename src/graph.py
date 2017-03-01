@@ -16,12 +16,12 @@ class Graph:
 		self.reset_memoization()
 		for x, node in zip(X, self.input_nodes):
 			node.set_value(x)
-		return [node.evaluate() for node in self.output_nodes]
+		return [node.get_output() for node in self.output_nodes]
 
 	def backpropagate(self, Y):
 		for y, node in zip(Y, self.expected_output_nodes):
 			node.set_value(y)
-		cost = self.cost_node.evaluate()
+		cost = self.cost_node.get_output()
 		for node in self.learnable_nodes:
 			node.get_gradient(0)
 		return cost

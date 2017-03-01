@@ -20,7 +20,7 @@ class CompositeNode(LearnableNode):
         for node, x in zip(self.input_nodes, self.x):
             node.set_value(x)
         # Propagate
-        return [node.evaluate() for node in self.output_nodes]
+        return [node.get_output() for node in self.output_nodes]
 
     def compute_gradient(self):
         # Set the gradient nodes values

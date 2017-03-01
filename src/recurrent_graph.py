@@ -17,7 +17,7 @@ class RecurrentGraph:
 		# Propagate
 		outputs = []
 		for x, layer in zip(sequence, self.layers):
-			output, H = layer.evaluate([x], H)
+			output, H = layer.get_output([x], H)
 			outputs.append(output)
 		return outputs
 
@@ -35,7 +35,13 @@ class RecurrentGraph:
 	def descend_gradient(self, learning_rate):
 		for layer in self.layers:
 			layer.descend_gradient(learning_rate)
+		# Reset accumulators
+		self.reset_accumulators()
 
 	def reset_memoization(self):
 		for layer in self.layers:
 			layer.reset_memoization()
+
+	def reset_accumulators(self):
+		for layer in self.layers:
+			layer.reset_accumulators()

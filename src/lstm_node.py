@@ -2,7 +2,7 @@ from node import *
 from composite_node import *
 
 class LSTMNode(CompositeNode):
-	def __init__(self, dim_x, dim_s):
+	def __init__(self, dim_x, dim_s, parents=None):
 		# Save the dimensions
 		self.dim_x = dim_x
 		self.dim_s = dim_s
@@ -45,4 +45,4 @@ class LSTMNode(CompositeNode):
 		nodes = [self.x, self.h_in, self.s_in, self.c, self.wg, self.mg, self.g, self.wi, self.mi, \
 			self.i, self.a, self.s_out, self.l, self.wo, self.mo, self.o, self.h_out]
 		CompositeNode.__init__(self, nodes, [self.x, self.h_in, self.s_in], [self.h_out, self.s_out], \
-			[self.wg, self.wi, self.wo])
+			[self.wg, self.wi, self.wo], parents)
