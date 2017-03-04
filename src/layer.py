@@ -46,7 +46,7 @@ class Layer:
 			node.get_gradient(0)
 		# Backpropagate
 		# Return dJdH_in and the cost
-		return [node.get_gradient(0) for node in self.input_nodes], cost
+		return [node.get_gradient(0) for node in self.hidden_input_nodes], cost
 
 	def descend_gradient(self, learning_rate):
 		for node in self.learnable_nodes:
