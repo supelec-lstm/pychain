@@ -13,7 +13,7 @@ class RecurrentGraph:
 		self.reset_memoization()
 		# Init H
 		if H is None:
-			H = np.array([np.zeros(shape) for shape in self.hidden_shapes])
+			H = [np.zeros(shape) for shape in self.hidden_shapes]
 		# Propagate
 		outputs = []
 		for x, layer in zip(sequence, self.layers):
@@ -24,7 +24,7 @@ class RecurrentGraph:
 	def backpropagate(self, expected_sequence, dJdH=None):
 		# Init dJdH
 		if dJdH is None:
-			dJdH = np.array([np.zeros(shape) for shape in self.hidden_shapes])
+			dJdH = [np.zeros(shape) for shape in self.hidden_shapes]
 		# Backpropagate
 		total_cost = 0
 		for y, layer in zip(reversed(expected_sequence), reversed(self.layers)):
