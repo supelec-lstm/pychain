@@ -21,6 +21,21 @@ class RecurrentGraph:
 			outputs.append(output)
 		return outputs
 
+	def propagate_self_feeding(self, x, H=None):
+		# Reset memoization
+		self.reset_memoization()
+		# Init H
+		if H is None:
+			H = [np.zeros(shape) for shape in self.hidden_shapes]
+		# Propagate
+		outputs = []
+		cur_input = x
+		for layer in self.layers:
+			output, H = layer.get_output([cur_input], H)
+			outputs.append(output)
+			cur_input = output[0]
+		return outputs
+
 	def backpropagate(self, expected_sequence, dJdH=None):
 		# Init dJdH
 		if dJdH is None:
