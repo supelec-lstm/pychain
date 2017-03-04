@@ -46,3 +46,30 @@ class LSTMNode(CompositeNode):
 			self.i, self.a, self.s_out, self.l, self.wo, self.mo, self.o, self.h_out]
 		CompositeNode.__init__(self, nodes, [self.x, self.h_in, self.s_in], [self.h_out, self.s_out], \
 			[self.wg, self.wi, self.wo], parents)
+
+	def clone(self):
+		# Very practical for debugging
+		node = CompositeNode.clone(self)
+		nodes = node.nodes
+		node.x = nodes[0]
+		node.h_in = nodes[1]
+		node.s_in = nodes[2]
+		node.c = nodes[3]
+		node.wg = nodes[4]
+		node.mg = nodes[5]
+		node.g = nodes[6]
+		node.wi = nodes[7]
+		node.mi = nodes[8]
+		node.i = nodes[9]
+		node.a = nodes[10]
+		node.s_out = nodes[11]
+		node.l = nodes[12]
+		node.wo = nodes[13]
+		node.mo = nodes[14]
+		node.o = nodes[15]
+		node.h_out = nodes[16]
+		return node
+
+
+
+
