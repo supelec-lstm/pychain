@@ -37,7 +37,10 @@ class CompositeNode(LearnableNode):
             node.descend_gradient(learning_rate, batch_size)
 
     def reset_memoization(self):
-        for node in self.learnable_nodes:
+        # Reset memoization of the composite node
+        LearnableNode.reset_memoization(self)
+        # Reset memoization of the nodes inside the composite node
+        for node in self.nodes:
             node.reset_memoization()
 
     def reset_accumulator(self):

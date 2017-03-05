@@ -34,6 +34,7 @@ class Node:
         self.x = None
         self.y = None
         self.dJdx = None
+        self.dJdy = None
 
     def get_output(self, i_output=0):
         if self.y is None:
