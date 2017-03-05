@@ -22,14 +22,16 @@ index_to_letter = {i: letter for i, letter in enumerate(letters)}
 num_lstms = 2
 dim_s = 128
 hidden_shapes = [(1, dim_s), (1, dim_s)] * num_lstms
-learning_rate = 0.1
+learning_rate = 2e-3
+len_seq = 50
 
 def string_to_sequence(string):
     sequence = np.zeros((len(string), 1, len(letters)))
     for i, letter in enumerate(string):
         if not letter in letters:
-            return []
-        sequence[i, 0, letter_to_index[letter]] = 1
+            sequence[i, 0, letter_to_index[' ']] = 1
+        else:
+            sequence[i, 0, letter_to_index[letter]] = 1
     return sequence
 
 def sequence_to_string(sequence):
@@ -39,33 +41,35 @@ def sample_sequence_to_string(sequence):
     return ''.join([letters[np.random.choice(len(letters), p=x[0].flatten())] for x in sequence])
 
 def learn_shakespeare(layer, path, N):
+    # Read file
     f = open(path)
-
-    for i, line in zip(range(N), f):
+    text = f.read().upper()
+    f.close()
+    # Create the graph
+    graph = RecurrentGraph(layer, len_seq - 1, hidden_shapes)
+    # Learn
+    for i in range(0, len(text), len_seq):
+        #string = text[0:len_seq]
+        string = text[i:i+50]
+        sequence = string_to_sequence(string)
         if i % 100 == 0:
             print(i)
         if i % 1000 == 0:
-            sample(layer, 20)
-        string = f.readline().strip().upper()
-        sequence = string_to_sequence(string)
-        if len(sequence) > 1:
-            X = sequence[:-1]
-            Y = sequence[1:]
-            graph = RecurrentGraph(layer, len(sequence)-1, hidden_shapes)
-            graph.propagate(sequence[:-1])
-            graph.backpropagate(sequence[1:])
-            graph.descend_gradient(learning_rate)
+            print(string)
+            sample(graph)
+            #test(graph)
+        graph.propagate(sequence[:-1])
+        graph.backpropagate(sequence[1:])
+        graph.descend_gradient(learning_rate)
 
-    f.close()
-
-def sample(layer, n):
+def sample(graph):
     for i in range(ord('A'), ord('Z')+1):
         s = chr(i).upper()
         x = string_to_sequence(s)[0]
-        graph = RecurrentGraph(layer, n, hidden_shapes)
         result = graph.propagate_self_feeding(x)
         print(chr(i) + sample_sequence_to_string(result))
         print(chr(i) + sequence_to_string(result))
+    #print(layer.learnable_nodes[0].w)
 
 def create_layer():
     # Input
@@ -101,7 +105,16 @@ def create_layer():
     nodes = hidden_inputs + hidden_outputs + lstms + [x, w, mult, out, y, e, cost]
     return Layer(nodes, [x], [out], hidden_inputs, hidden_outputs, [y], cost, [w] + lstms)
 
+def test(graph):
+    string = 'FIRST CITIZEN:\nBEFORE WE PROCEED ANY FURTHER, HEAR'
+    sequence = string_to_sequence(string)
+    result = graph.propagate(sequence[:-1])
+    for letter, y in zip(string[:5], result[:5]):
+        print(letter, [(l, p) for l, p in zip(letters, y[0].flatten())])
+
 if __name__ == '__main__':
     layer = create_layer()
-    learn_shakespeare(layer, 'examples/shakespeare/shakespeare_karpathy.txt', 10000)
-    pickle.dump(layer, open('shakespeare.pickle', 'wb'))
+    try:
+        learn_shakespeare(layer, 'examples/shakespeare/shakespeare_karpathy.txt', 40000)
+    finally:
+        pickle.dump(layer, open('shakespeare.pickle', 'wb'))
