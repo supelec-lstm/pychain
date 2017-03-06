@@ -19,7 +19,7 @@ letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',\
 letter_to_index = {letter: i for i, letter in enumerate(letters)}
 index_to_letter = {i: letter for i, letter in enumerate(letters)}
 
-num_lstms = 2
+num_lstms = 3
 dim_s = 128
 hidden_shapes = [(1, dim_s), (1, dim_s)] * num_lstms
 learning_rate = 2e-3
@@ -41,26 +41,27 @@ def sample_sequence_to_string(sequence):
     return ''.join([letters[np.random.choice(len(letters), p=x[0].flatten())] for x in sequence])
 
 def learn_shakespeare(layer, path, N):
-    # Read file
-    f = open(path)
-    text = f.read().upper()
-    f.close()
     # Create the graph
     graph = RecurrentGraph(layer, len_seq - 1, hidden_shapes)
     # Learn
-    for i in range(0, len(text), len_seq):
-        #string = text[0:len_seq]
-        string = text[i:i+50]
-        sequence = string_to_sequence(string)
-        if i % 100 == 0:
-            print(i)
-        if i % 1000 == 0:
-            print(string)
-            sample(graph)
-            #test(graph)
-        graph.propagate(sequence[:-1])
-        graph.backpropagate(sequence[1:])
-        graph.descend_gradient(learning_rate)
+    while True:
+        # Read file
+        f = open(path)
+        text = f.read().upper()
+        f.close()
+        for i in range(0, len(text), len_seq):
+            #string = text[0:len_seq]
+            string = text[i:i+50]
+            sequence = string_to_sequence(string)
+            if i % 100 == 0:
+                print(i)
+            if i % 1000 == 0:
+                print(string)
+                sample(graph)
+                #test(graph)
+            graph.propagate(sequence[:-1])
+            graph.backpropagate(sequence[1:])
+            graph.descend_gradient(learning_rate)
 
 def sample(graph):
     for i in range(ord('A'), ord('Z')+1):
@@ -94,7 +95,7 @@ def create_layer():
         hidden_outputs += [h_out, s_out]
         lstms.append(lstm)
     # Softmax
-    w = LearnableNode(np.random.randn(dim_s, len(letters)))
+    w = LearnableNode(0.1 * np.random.randn(dim_s, len(letters)))
     mult = MultiplicationNode(parent, w)
     out = SoftmaxNode(mult)
     # Cost

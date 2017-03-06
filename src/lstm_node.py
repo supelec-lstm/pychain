@@ -17,12 +17,12 @@ class LSTMNode(CompositeNode):
 		self.dim_c = self.dim_s + self.dim_x
 
 		# g
-		self.wg = LearnableNode(np.random.randn(self.dim_c, self.dim_s))
+		self.wg = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
 		self.mg = MultiplicationNode(self.c, self.wg)
 		self.g = SigmoidNode(self.mg)
 
 		# i
-		self.wi = LearnableNode(np.random.rand(self.dim_c, self.dim_s))
+		self.wi = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
 		self.mi = MultiplicationNode(self.c, self.wi)
 		self.i = TanhNode(self.mi)
 
@@ -34,7 +34,7 @@ class LSTMNode(CompositeNode):
 		self.l = TanhNode(self.s_out)
 
 		# o
-		self.wo = LearnableNode(np.random.rand(self.dim_c, self.dim_s))
+		self.wo = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
 		self.mo = MultiplicationNode(self.c, self.wo)
 		self.o = SigmoidNode(self.mo)
 
