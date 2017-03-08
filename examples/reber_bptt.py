@@ -43,9 +43,10 @@ def train_reber(layer, N):
     for i in range(N):
         if i % 1000 == 0:
             t.append(i)
-            print(i)
+            #print(i)
             accuracies.append(accuracy(layer, 1000))
-            print(accuracies[-1])
+            print(str(accuracies[-1]), end="")
+            print(", ", end="")
         string = f.readline().strip()
         sequence = string_to_sequence(string)
         graph = RecurrentGraph(layer, len(sequence)-1, hidden_shapes)
@@ -75,8 +76,8 @@ def accuracy(layer, N):
     f = open(test_path)
     c = 0
     for i in range(N):
-        if i % 1000 == 0:
-            print(i)
+        """if i % 1000 == 0:
+            print(i)"""
         string = f.readline().strip()
         if predict_correctly(layer, string, 0.3):
             c += 1
@@ -110,7 +111,9 @@ def create_layer():
     return Layer(nodes, [x], [out], [h_in], [h_out], [y], cost, [w])
 
 if __name__ == '__main__':
-    layer = create_layer()
-    train_reber(layer, 100000)
+    for _ in range(20):
+        layer = create_layer()
+        train_reber(layer, 100000)
+        print()
     #print(accuracy(layer, 100000))
     #test_reber(layer)
