@@ -20,7 +20,7 @@ letter_to_index = {letter: i for i, letter in enumerate(letters)}
 index_to_letter = {i: letter for i, letter in enumerate(letters)}
 
 num_lstms = 3
-dim_s = 128
+dim_s = 512
 hidden_shapes = [(1, dim_s), (1, dim_s)] * num_lstms
 learning_rate = 2e-3
 len_seq = 50
@@ -53,9 +53,9 @@ def learn_shakespeare(layer, path, N):
             #string = text[0:len_seq]
             string = text[i:i+50]
             sequence = string_to_sequence(string)
-            if i % 100 == 0:
+            if i % (100 * len_seq) == 0:
                 print(i)
-            if i % 1000 == 0:
+            if i % (1000 * len_seq) == 0:
                 print(string)
                 sample(graph)
                 #test(graph)
@@ -118,4 +118,6 @@ if __name__ == '__main__':
     try:
         learn_shakespeare(layer, 'examples/shakespeare/shakespeare_karpathy.txt', 40000)
     finally:
-        pickle.dump(layer, open('shakespeare.pickle', 'wb'))
+        save = input("Save? (Y/N)")
+        if save == 'Y':
+            pickle.dump(layer, open('shakespeare.pickle', 'wb'))
