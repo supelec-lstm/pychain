@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 
 import pickle
 import time
+from datetime import datetime
 import matplotlib.pyplot as plt
 from lstm_node import *
 from layer import *
@@ -19,20 +20,22 @@ letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',\
 letter_to_index = {letter: i for i, letter in enumerate(letters)}
 index_to_letter = {i: letter for i, letter in enumerate(letters)}
 
-num_lstms = 3
-dim_s = 512
-hidden_shapes = [(1, dim_s), (1, dim_s)] * num_lstms
+num_lstms = 2
+dim_s = 128
 learning_rate = 2e-3
 len_seq = 50
+nb_seq_per_batch = 50
+hidden_shapes = [(nb_seq_per_batch, dim_s), (nb_seq_per_batch, dim_s)] * num_lstms
 
-def string_to_sequence(string):
-    sequence = np.zeros((len(string), 1, len(letters)))
-    for i, letter in enumerate(string):
-        if not letter in letters:
-            sequence[i, 0, letter_to_index[' ']] = 1
-        else:
-            sequence[i, 0, letter_to_index[letter]] = 1
-    return sequence
+def string_to_sequences(string):
+    sequences = np.zeros((len_seq, nb_seq_per_batch, len(letters)))
+    for i_seq in range(nb_seq_per_batch):
+        for i, letter in enumerate(string[i_seq*len_seq:(i_seq+1)*len_seq]):
+            if not letter in letters:
+                sequences[i, i_seq, letter_to_index[' ']] = 1
+            else:
+                sequences[i, i_seq, letter_to_index[letter]] = 1
+    return sequences
 
 def sequence_to_string(sequence):
     return ''.join([letters[np.argmax(x[0])] for x in sequence])
@@ -44,24 +47,32 @@ def learn_shakespeare(layer, path, N):
     # Create the graph
     graph = RecurrentGraph(layer, len_seq - 1, hidden_shapes)
     # Learn
+    i_pass = 1
+    i_batch = 1
     while True:
         # Read file
         f = open(path)
         text = f.read().upper()
         f.close()
-        for i in range(0, len(text), len_seq):
-            #string = text[0:len_seq]
-            string = text[i:i+50]
-            sequence = string_to_sequence(string)
-            if i % (100 * len_seq) == 0:
-                print(i)
-            if i % (1000 * len_seq) == 0:
-                print(string)
+        len_batch = len_seq*nb_seq_per_batch
+        nb_batches = int(len(text) / len_batch)
+        for i in range(nb_batches):
+            # Take a new batch
+            string = text[i*len_batch:(i+1)*len_batch]
+            sequences = string_to_sequences(string)
+            # Propagate and backpropagate the batch
+            graph.propagate(sequences[:-1])
+            cost = graph.backpropagate(sequences[1:]) / len_seq / nb_seq_per_batch
+            graph.descend_gradient(learning_rate, nb_seq_per_batch)
+            # Save and sample
+            if i != 0 and i_batch % 1000 == 0:
                 sample(graph)
-                #test(graph)
-            graph.propagate(sequence[:-1])
-            graph.backpropagate(sequence[1:])
-            graph.descend_gradient(learning_rate)
+                save_layer(layer, i_batch)
+            # Print info
+            print('pass: ' + str(i_pass) + ', batch: ' + str(i+1) + '/' + str(nb_batches) + \
+                ', cost: ' + str(cost))
+            i_batch += 1
+        i_pass += 1
 
 def sample(graph):
     for i in range(ord('A'), ord('Z')+1):
@@ -113,11 +124,11 @@ def test(graph):
     for letter, y in zip(string[:5], result[:5]):
         print(letter, [(l, p) for l, p in zip(letters, y[0].flatten())])
 
+def save_layer(layer, i_batch):
+    path = 'models/' + str(datetime.now()) + '_b:' +  str(i_batch) + '.pickle'
+    pickle.dump(layer, open(path, 'wb'))
+
 if __name__ == '__main__':
     layer = create_layer()
-    try:
-        learn_shakespeare(layer, 'examples/shakespeare/shakespeare_karpathy.txt', 40000)
-    finally:
-        save = input("Save? (Y/N)")
-        if save == 'Y':
-            pickle.dump(layer, open('shakespeare.pickle', 'wb'))
+    save_layer(layer, 0)
+    learn_shakespeare(layer, 'examples/shakespeare/shakespeare_karpathy.txt', 40000)
