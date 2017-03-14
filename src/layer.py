@@ -48,9 +48,9 @@ class Layer:
         # Return dJdH_in and the cost
         return [node.get_gradient(0) for node in self.hidden_input_nodes], cost
 
-    def descend_gradient(self, learning_rate):
+    def descend_gradient(self, learning_rate, batch_size=1):
         for node in self.learnable_nodes:
-            node.descend_gradient(learning_rate, 1)
+            node.descend_gradient(learning_rate, batch_size)
 
     def reset_memoization(self):
         for node in self.nodes:

@@ -11,6 +11,10 @@ class Node:
         self.y = None
         self.dJdx = None
 
+        # Dirty flags
+        self.output_dirty = True
+        self.gradient_dirty = True
+
     def set_parents(self, parents):
         self.parents = []
         for i, pair in enumerate(parents):
@@ -31,24 +35,25 @@ class Node:
         self.children[i_output].append((child, i_child_input))
 
     def reset_memoization(self):
-        self.x = None
-        self.y = None
-        self.dJdx = None
-        self.dJdy = None
+        # Reset flags
+        self.output_dirty = True
+        self.gradient_dirty = True
 
     def get_output(self, i_output=0):
-        if self.y is None:
+        if self.output_dirty:
             self.x = [parent.get_output(i_parent_output) for (parent, i_parent_output) in self.parents]
             self.y = self.compute_output()
+            self.output_dirty = False
         return self.y[i_output]
 
     def compute_output(self):
         raise NotImplementedError()
 
     def get_gradient(self, i_child_input=0):
-        if self.dJdx is None:
+        if self.gradient_dirty:
             self.dJdy = [np.sum(child.get_gradient(i) for child, i in children) for children in self.children]
             self.dJdx = self.compute_gradient()
+            self.gradient_dirty = False
         return self.dJdx[i_child_input]
 
     def compute_gradient(self):
@@ -116,13 +121,13 @@ class FunctionNode(Node):
             Node.__init__(self)
 
     def get_output(self, i_output=0):
-        if self.y is None:
+        if self.output_dirty:
             self.x = self.parents[0][0].get_output(self.parents[0][1])
             self.y = self.compute_output()
         return self.y
 
     def get_gradient(self, i_child_input=0):
-        if self.dJdx is None:
+        if self.gradient_dirty:
             self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children[0])
             self.dJdx = self.compute_gradient()
         return self.dJdx
@@ -222,13 +227,13 @@ class BinaryOpNode(Node):
             Node.__init__(self, [parent1, parent2])
 
     def get_output(self, i_output=0):
-        if self.y is None:
+        if self.output_dirty:
             self.x = [parent.get_output(i_parent_output) for (parent, i_parent_output) in self.parents]
             self.y = self.compute_output()
         return self.y
 
     def get_gradient(self, i_child_input=0):
-        if self.dJdx is None:
+        if self.gradient_dirty:
             self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children[0])
             self.dJdx = self.compute_gradient()
         return self.dJdx[i_child_input]
