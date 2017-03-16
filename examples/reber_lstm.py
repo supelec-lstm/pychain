@@ -104,12 +104,12 @@ def create_layer():
     # LSTM
     lstm = LSTMNode(len(letters), len(letters), [x, h_in, s_in])
     # Outputs
-    h_out = IdentityNode((lstm, 0))
-    s_out = IdentityNode((lstm, 1))
+    h_out = IdentityNode([(lstm, 0)])
+    s_out = IdentityNode([(lstm, 1)])
     # Cost
     y = InputNode()
-    e = SubstractionNode(y, h_out)
-    cost = Norm2Node(e)
+    e = SubstractionNode([y, h_out])
+    cost = Norm2Node([e])
 
     nodes = [x, h_in, s_in, lstm, h_out, s_out, y, e, cost]
     return Layer(nodes, [x], [h_out], [h_in, s_in], [h_out, s_out], [y], cost, [lstm])
@@ -124,18 +124,18 @@ def create_complex_layer():
     h_in1 = InputNode()
     s_in1 = InputNode()
     lstm1 = LSTMNode(len(letters), dim_s, [x, h_in1, s_in1])
-    h_out1 = IdentityNode((lstm1, 0))
-    s_out1 = IdentityNode((lstm1, 1))
+    h_out1 = IdentityNode([(lstm1, 0)])
+    s_out1 = IdentityNode([(lstm1, 1)])
     # LSTM 2
     h_in2 = InputNode()
     s_in2 = InputNode()
     lstm2 = LSTMNode(dim_s, len(letters), [h_out1, h_in2, s_in2])
-    h_out2 = IdentityNode((lstm2, 0))
-    s_out2 = IdentityNode((lstm2, 1))
+    h_out2 = IdentityNode([(lstm2, 0)])
+    s_out2 = IdentityNode([(lstm2, 1)])
     # Cost
     y = InputNode()
-    e = SubstractionNode(y, h_out2)
-    cost = Norm2Node(e)
+    e = SubstractionNode([y, h_out2])
+    cost = Norm2Node([e])
 
     nodes = [x, h_in1, s_in1, h_in2, s_in2, lstm1, lstm2, h_out1, s_out1, h_out2, s_out2, y, e, cost]
     return Layer(nodes, [x], [h_out2], [h_in1, s_in1, h_in2, s_in2], [h_out1, s_out1, h_out2, s_out2], \
