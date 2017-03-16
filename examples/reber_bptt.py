@@ -97,15 +97,15 @@ def create_layer():
     # Hidden inputs
     h_in = InputNode()
     # Output
-    total_in = ConcatenationNode(x, h_in)
+    total_in = ConcatenationNode([x, h_in])
     w = LearnableNode(0.1 * np.random.randn(nb_hidden_neurons + 2 * len(letters), nb_hidden_neurons + len(letters)))
-    mult = MultiplicationNode(total_in, w)
-    h_out = SigmoidNode(mult)
-    out = SelectionNode(h_out, 0, len(letters))
+    mult = MultiplicationNode([total_in, w])
+    h_out = SigmoidNode([mult])
+    out = SelectionNode([h_out], 0, len(letters))
     # Cost
     y = InputNode()
-    e = SubstractionNode(y, out)
-    cost = Norm2Node(e)
+    e = SubstractionNode([y, out])
+    cost = Norm2Node([e])
 
     nodes = [x, h_in, total_in, w, mult, h_out, out, y, e, cost]
     return Layer(nodes, [x], [out], [h_in], [h_out], [y], cost, [w])

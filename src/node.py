@@ -181,7 +181,7 @@ class ScalarMultiplicationNode(Node):
         return [self.scalar * self.dJdy[0]]
 
     def clone(self):
-        return ScalarMultiplicationNode(scalar=self.scalar)
+        return ScalarMultiplicationNode(None, scalar=self.scalar)
 
 class Norm2Node(Node):
     def compute_output(self):
@@ -205,7 +205,7 @@ class SelectionNode(Node):
         return [gradient]
 
     def clone(self):
-        return SelectionNode(start=self.start, end=self.end)
+        return SelectionNode(None, start=self.start, end=self.end)
 
 class AdditionNode(Node):
     def compute_output(self):
