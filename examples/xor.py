@@ -45,13 +45,13 @@ def fully_connected(layers):
 	prev_size = 3
 	for i, size in enumerate(layers):
 		# layer
-		bias_node = AddBiasNode(cur_input_node)
+		bias_node = AddBiasNode([cur_input_node])
 		weights_node = LearnableNode(np.random.rand(prev_size, size)*1-0.5)
-		prod_node = MultiplicationNode(bias_node, weights_node)
+		prod_node = MultiplicationNode([bias_node, weights_node])
 		if i+1 < len(layers):
-			activation_node = TanhNode(prod_node)
+			activation_node = TanhNode([prod_node])
 		else:
-			activation_node = SigmoidNode(prod_node)
+			activation_node = SigmoidNode([prod_node])
 		# save the nodes
 		learnable_nodes.append(weights_node)
 		nodes += [bias_node, weights_node, prod_node, activation_node]
@@ -59,9 +59,9 @@ def fully_connected(layers):
 		prev_size = size + 1
 
 	expected_output_node = InputNode()
-	#sub_node = SubstractionNode(expected_output_node, cur_input_node)
-	cost_node = SigmoidCrossEntropyNode(expected_output_node, cur_input_node)
-	#cost_node = Norm2Node(sub_node)
+	#sub_node = SubstractionNode([expected_output_node, cur_input_node])
+	cost_node = SigmoidCrossEntropyNode([expected_output_node, cur_input_node])
+	#cost_node = Norm2Node([sub_node])
 
 	nodes += [expected_output_node, cost_node]
 	return Graph(nodes, [input_node], [cur_input_node], [expected_output_node], cost_node, learnable_nodes)
