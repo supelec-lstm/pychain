@@ -90,8 +90,8 @@ def create_layer():
         if i == 0:
             dim_x = len(letters)
         lstm = LSTMWFGNode(dim_x, dim_s, [parent, h_in, s_in])
-        h_out = IdentityNode((lstm, 0))
-        s_out = IdentityNode((lstm, 1))
+        h_out = IdentityNode([(lstm, 0)])
+        s_out = IdentityNode([(lstm, 1)])
         parent = h_out
         # Add to containers
         hidden_inputs += [h_in, s_in]
@@ -99,13 +99,13 @@ def create_layer():
         lstms.append(lstm)
     # Softmax
     w = LearnableNode(0.1 * np.random.randn(dim_s, len(letters)))
-    mult = MultiplicationNode(parent, w)
-    out = SoftmaxNode(mult)
+    mult = MultiplicationNode([parent, w])
+    out = SoftmaxNode([mult])
     # Cost
     y = InputNode()
-    cost = SoftmaxCrossEntropyNode(y, out)
-    #e = SubstractionNode(y, out)
-    #cost = Norm2Node(e)
+    cost = SoftmaxCrossEntropyNode([y, out])
+    #e = SubstractionNode([y, out])
+    #cost = Norm2Node([e])
 
     #nodes = hidden_inputs + hidden_outputs + lstms + [x, w, mult, out, y, e, cost]
     nodes = hidden_inputs + hidden_outputs + lstms + [x, w, mult, out, y, cost]
