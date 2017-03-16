@@ -40,7 +40,7 @@ def test_output_node():
 def test_norm2_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])	
 	input_node = InputNode(value)
-	norm2_node = Norm2Node(input_node)
+	norm2_node = Norm2Node([input_node])
 	output_node = GradientInputNode([norm2_node])
 
 	assert norm2_node.get_output() == 91
@@ -49,8 +49,8 @@ def test_norm2_node():
 def test_add_bias_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])	
 	input_node = InputNode(value)
-	add_bias_node = AddBiasNode(input_node)
-	norm2_node = Norm2Node(add_bias_node)
+	add_bias_node = AddBiasNode([input_node])
+	norm2_node = Norm2Node([add_bias_node])
 	output_node = GradientInputNode([norm2_node])
 
 	assert np.array_equal(add_bias_node.get_output(), np.array([[1, 1, 2], [1, 3, 4], [1, 5, 6]]))
@@ -60,8 +60,8 @@ def test_add_bias_node():
 def test_identity_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])		
 	input_node = InputNode(value)
-	id_node = IdentityNode(input_node)
-	norm2_node = Norm2Node(id_node)
+	id_node = IdentityNode([input_node])
+	norm2_node = Norm2Node([id_node])
 	output_node = GradientInputNode([norm2_node])
 
 	assert np.array_equal(id_node.get_output(), value)
@@ -71,8 +71,8 @@ def test_identity_node():
 def test_sigmoid_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])		
 	input_node = InputNode(value)
-	sigmoid_node = SigmoidNode(input_node)
-	norm2_node = Norm2Node(sigmoid_node)
+	sigmoid_node = SigmoidNode([input_node])
+	norm2_node = Norm2Node([sigmoid_node])
 	output_node = GradientInputNode([norm2_node])
 
 	y = 1/(1+np.exp(-value))
@@ -83,8 +83,8 @@ def test_sigmoid_node():
 def test_tanh_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])	
 	input_node = InputNode(value)
-	tanh_node = TanhNode(input_node)
-	norm2_node = Norm2Node(tanh_node)
+	tanh_node = TanhNode([input_node])
+	norm2_node = Norm2Node([tanh_node])
 	output_node = GradientInputNode([norm2_node])
 
 	y = np.tanh(value)
@@ -95,8 +95,8 @@ def test_tanh_node():
 def test_relu_node():
 	value = np.array([[-1, 2], [3, -4], [-5, 6]])	
 	input_node = InputNode(value)
-	relu_node = ReluNode(input_node)
-	norm2_node = Norm2Node(relu_node)
+	relu_node = ReluNode([input_node])
+	norm2_node = Norm2Node([relu_node])
 	output_node = GradientInputNode([norm2_node])
 
 	y = np.array([[0, 2], [3, 0], [0, 6]])
@@ -107,8 +107,8 @@ def test_relu_node():
 def test_softmax_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])		
 	input_node = InputNode(value)
-	softmax_node = SoftmaxNode(input_node)
-	norm2_node = Norm2Node(softmax_node)
+	softmax_node = SoftmaxNode([input_node])
+	norm2_node = Norm2Node([softmax_node])
 	output_node = GradientInputNode([norm2_node])
 
 	sum1, sum2, sum3 = np.exp(1)+np.exp(2), np.exp(3)+np.exp(4), np.exp(5)+np.exp(6)
@@ -131,8 +131,8 @@ def test_softmax_node():
 def scalar_multiplication_node():
 	value = np.array([[1, 2], [3, 4], [5, 6]])	
 	input_node = InputNode(value)
-	scalar_node = ScalarMultiplicationNode(input_node, 3)
-	norm2_node = Norm2Node(scalar_node)
+	scalar_node = ScalarMultiplicationNode([input_node], 3)
+	norm2_node = Norm2Node([scalar_node])
 	output_node = GradientInputNode([norm2_node])
 
 	assert np.array_equal(scalar_node.get_output(), 3*value)
@@ -142,8 +142,8 @@ def scalar_multiplication_node():
 def test_selection_node():
 	value = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])	
 	input_node = InputNode(value)
-	selection_node = SelectionNode(input_node, 1, 3)
-	norm2_node = Norm2Node(selection_node)
+	selection_node = SelectionNode([input_node], 1, 3)
+	norm2_node = Norm2Node([selection_node])
 	output_node = GradientInputNode([norm2_node])
 
 	assert np.array_equal(selection_node.get_output(), np.array([[2, 3], [6, 7]]))
@@ -156,7 +156,7 @@ def init_ones(shape):
 
 def test_learnable_node():	
 	learnable_node = LearnableNode(init_ones((3, 2)))
-	norm2_node = Norm2Node(learnable_node)
+	norm2_node = Norm2Node([learnable_node])
 	output_node = GradientInputNode([norm2_node])
 
 	assert np.array_equal(learnable_node.get_output(), np.ones((3, 2)))
@@ -178,7 +178,7 @@ def test_addition_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2], [3, 3]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4], [5, 6]]))
 	node_add = AdditionNode(node_in1, node_in2)
-	node_fun = Norm2Node(node_add)
+	node_fun = Norm2Node([node_add])
 	node_out = GradientInputNode([node_fun])
 
 	y = np.array([[2, 3], [5, 6], [8, 9]])
@@ -192,7 +192,7 @@ def test_substraction_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2], [3, 3]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4], [5, 6]]))
 	node_sub = SubstractionNode(node_in1, node_in2)
-	node_fun = Norm2Node(node_sub)
+	node_fun = Norm2Node([node_sub])
 	node_out = GradientInputNode([node_fun])
 
 	y = np.array([[0, -1], [-1, -2], [-2, -3]])
@@ -205,7 +205,7 @@ def test_multiplication_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
 	node_dot = MultiplicationNode(node_in1, node_in2)
-	node_fun = Norm2Node(node_dot)
+	node_fun = Norm2Node([node_dot])
 	node_out = GradientInputNode([node_fun])
 
 	assert np.array_equal(node_dot.get_output(), np.array([[4, 6], [8, 12]]))
@@ -217,7 +217,7 @@ def test_ew_multiplication_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
 	node_dot = EWMultiplicationNode(node_in1, node_in2)
-	node_fun = Norm2Node(node_dot)
+	node_fun = Norm2Node([node_dot])
 	node_out = GradientInputNode([node_fun])
 
 	assert np.array_equal(node_dot.get_output(), np.array([[1, 2], [6, 8]]))
@@ -229,7 +229,7 @@ def test_concatenate_node():
     node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
     node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
     node_conca =  ConcatenationNode(node_in1, node_in2)
-    node_fun = Norm2Node(node_conca)
+    node_fun = Norm2Node([node_conca])
     node_out = GradientInputNode([node_fun])
 
     assert np.array_equal(node_conca.get_output(), np.array([[1, 1, 1, 2], [2, 2, 3, 4]]))
@@ -266,7 +266,7 @@ def test_sum_node():
 	node_in2 = InputNode(np.array([[0.9, 0.3], [0.4, 0.8]]))
 	node_in3 = InputNode(np.array([[2, 3], [5, 6]]))
 	node_sum = SumNode([node_in1, node_in2, node_in3])
-	node_norm = Norm2Node(node_sum)
+	node_norm = Norm2Node([node_sum])
 	node_out = GradientInputNode([node_norm])
 	assert np.array_equal(node_sum.get_output(), np.array([[3.9, 3.3], [5.9, 7.5]]))
 

@@ -49,12 +49,13 @@ class Node:
     def compute_output(self):
         raise NotImplementedError()
 
-    def get_gradient(self, i_child_input=0):
+    def get_gradient(self, i_input=0):
+        # Get gradient with respect to the i_inputth input
         if self.gradient_dirty:
             self.dJdy = [np.sum(child.get_gradient(i) for child, i in children) for children in self.children]
             self.dJdx = self.compute_gradient()
             self.gradient_dirty = False
-        return self.dJdx[i_child_input]
+        return self.dJdx[i_input]
 
     def compute_gradient(self):
         raise NotImplementedError()
@@ -95,6 +96,7 @@ class LearnableNode(Node):
         Node.__init__(self)
         self.w = w
         self.acc_dJdw = np.zeros(self.w.shape) if acc_dJdw is None else acc_dJdw
+        #self.rms = np.zeros(self.w.shape)
 
     def compute_output(self):
         return [self.w]
@@ -104,7 +106,12 @@ class LearnableNode(Node):
         return self.dJdy
 
     def descend_gradient(self, learning_rate, batch_size):
+        #self.rms = 0.9*self.rms + 0.1*np.square(self.acc_dJdw)
+        #self.acc_dJdw /= np.sqrt(self.rms + 0.0001)
+        #self.acc_dJdw.clip(-5, 5)
         self.w -= (learning_rate/batch_size)*self.acc_dJdw
+        #self.w -= (learning_rate/batch_size)*np.clip(self.acc_dJdw, -5, 5)
+        #self.w -= (learning_rate/batch_size) / np.sqrt(self.rms + 0.0001) * self.acc_dJdw
 
     def reset_accumulator(self):
         self.acc_dJdw.fill(0)
@@ -112,109 +119,90 @@ class LearnableNode(Node):
     def clone(self):
         # The weights are always shared between the clones
         return LearnableNode(self.w, self.acc_dJdw)
-        
-class FunctionNode(Node):
-    def __init__(self, parent=None):
-        if parent:
-            Node.__init__(self, [parent])
-        else:
-            Node.__init__(self)
 
-    def get_output(self, i_output=0):
-        if self.output_dirty:
-            self.x = self.parents[0][0].get_output(self.parents[0][1])
-            self.y = self.compute_output()
-        return self.y
-
-    def get_gradient(self, i_child_input=0):
-        if self.gradient_dirty:
-            self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children[0])
-            self.dJdx = self.compute_gradient()
-        return self.dJdx
-
-class AddBiasNode(FunctionNode):
+class AddBiasNode(Node):
     def compute_output(self):
-        return np.concatenate((np.ones((self.x.shape[0], 1)), self.x), axis=1)
+        return [np.concatenate((np.ones((self.x[0].shape[0], 1)), self.x[0]), axis=1)]
 
     def compute_gradient(self):
-        return self.dJdy[:,1:]
+        return [self.dJdy[0][:,1:]]
 
-class IdentityNode(FunctionNode):
+class IdentityNode(Node):
     def compute_output(self):
-        return self.x
+        return [self.x[0]]
 
     def compute_gradient(self):
-        return self.dJdy
+        return [self.dJdy[0]]
 
-class SigmoidNode(FunctionNode):
+class SigmoidNode(Node):
     def compute_output(self):
-        return 1 / (1 + np.exp(-self.x))
+        return [1 / (1 + np.exp(-self.x[0]))]
 
     def compute_gradient(self):
-        return self.dJdy * (self.y*(1 - self.y))
+        return [self.dJdy[0] * (self.y[0]*(1 - self.y[0]))]
 
-class TanhNode(FunctionNode):
+class TanhNode(Node):
     def compute_output(self):
-        return np.tanh(self.x)
+        return [np.tanh(self.x[0])]
 
     def compute_gradient(self):
-        return self.dJdy * (1-np.square(self.y))
+        return [self.dJdy[0] * (1-np.square(self.y[0]))]
 
-class ReluNode(FunctionNode):
+class ReluNode(Node):
     def compute_output(self):
-        return np.maximum(0, self.x)
+        return [np.maximum(0, self.x[0])]
 
     def compute_gradient(self):
-        return self.dJdy * (self.x >= 0)
+        return [self.dJdy[0] * (self.x[0] >= 0)]
 
-class SoftmaxNode(FunctionNode):
+class SoftmaxNode(Node):
     def compute_output(self):
-        exp_x = np.exp(self.x)
+        exp_x = np.exp(self.x[0])
         sums = np.sum(exp_x, axis=1).reshape(exp_x.shape[0], 1)
-        return (exp_x / sums)
+        return [(exp_x / sums)]
 
     def compute_gradient(self):
-        dJdx = np.zeros((self.x.shape[0], self.x.shape[1]))
+        dJdx = np.zeros((self.x[0].shape))
         for i in range(dJdx.shape[0]):
-            y = np.array([self.y[i]])
-            dydx = -np.dot(y.T, y) + np.diag(self.y[i])
-            dJdx[i,:] = np.dot(dydx, self.dJdy[i])
-        return dJdx
+            y = np.array([self.y[0][i]])
+            dydx = -np.dot(y.T, y) + np.diag(self.y[0][i])
+            dJdx[i,:] = np.dot(dydx, self.dJdy[0][i])
+        return [dJdx]
 
-class ScalarMultiplicationNode(FunctionNode):
-    def __init__(self, parent=None, scalar=1):
-        FunctionNode.__init__(self,parent)
+class ScalarMultiplicationNode(Node):
+    def __init__(self, parents, scalar=1):
+        Node.__init__(self, parents)
         self.scalar = scalar
 
     def compute_output(self):
-        return self.scalar * self.x
+        return [self.scalar * self.x[0]]
 
     def compute_gradient(self):
-        return self.scalar * self.dJdy
+        return [self.scalar * self.dJdy[0]]
 
     def clone(self):
         return ScalarMultiplicationNode(scalar=self.scalar)
 
-class Norm2Node(FunctionNode):
+class Norm2Node(Node):
     def compute_output(self):
-        return np.sum(np.square(self.x))
+        return [np.sum(np.square(self.x[0]))]
 
     def compute_gradient(self):
-        return 2 * self.x * self.dJdy
+        return [2 * self.x[0] * self.dJdy[0]]
 
-class SelectionNode(FunctionNode):
-    def __init__(self, parent=None, start=0, end=0):
-        FunctionNode.__init__(self, parent)
+class SelectionNode(Node):
+    def __init__(self, parents, start=0, end=0):
+        Node.__init__(self, parents)
         self.start = start
         self.end = end
 
     def compute_output(self):
-        return self.x[:,self.start:self.end]
+        return [self.x[0][:,self.start:self.end]]
 
     def compute_gradient(self):
-        gradient = np.zeros(self.x.shape)
-        gradient[:,self.start:self.end] = self.dJdy
-        return gradient
+        gradient = np.zeros(self.x[0].shape)
+        gradient[:,self.start:self.end] = self.dJdy[0]
+        return [gradient]
 
     def clone(self):
         return SelectionNode(start=self.start, end=self.end)
