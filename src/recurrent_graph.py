@@ -21,7 +21,7 @@ class RecurrentGraph:
 			outputs.append(output)
 		return outputs
 
-	def propagate_self_feeding(self, x, H=None):
+	def generate(self, fselect, x, H=None):
 		# Reset memoization
 		self.reset_memoization()
 		# Init H
@@ -32,8 +32,8 @@ class RecurrentGraph:
 		cur_input = x
 		for layer in self.layers:
 			output, H = layer.get_output([cur_input], H)
-			outputs.append(output)
-			cur_input = output[0]
+			cur_input = fselect(output[0])
+			outputs.append(cur_input)
 		return outputs
 
 	def backpropagate(self, expected_sequence, dJdH=None):
@@ -48,8 +48,8 @@ class RecurrentGraph:
 		return total_cost
 
 	def descend_gradient(self, learning_rate, batch_size=1):
-		for layer in self.layers:
-			layer.descend_gradient(learning_rate, batch_size)
+		if len(self.layers) > 0:
+			self.layers[0].descend_gradient(learning_rate, batch_size)
 		# Reset accumulators
 		self.reset_accumulators()
 
