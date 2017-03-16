@@ -54,22 +54,22 @@ def fully_connected(layers):
     prev_size = 28*28+1
     cur_input_node = input_node
     for i, size in enumerate(layers):
-        bias_node = AddBiasNode(cur_input_node)
+        bias_node = AddBiasNode([cur_input_node])
         weights_node = LearnableNode(init_function((prev_size, size)))
-        prod_node = MultiplicationNode(bias_node, weights_node)
+        prod_node = MultiplicationNode([bias_node, weights_node])
         if i+1 < len(layers):
-            cur_input_node = TanhNode(prod_node)
+            cur_input_node = TanhNode([prod_node])
         else:
-            cur_input_node = SoftmaxNode(prod_node)
+            cur_input_node = SoftmaxNode([prod_node])
         learnable_nodes += [weights_node]
         nodes += [bias_node, weights_node, prod_node, cur_input_node]
         prev_size = size+1
     
     expected_output_node = InputNode()
-    #diff_node = SubstractionNode(expected_output_node, cur_input_node)
-    #cost_node = Norm2Node(diff_node)
-    cost_node = SoftmaxCrossEntropyNode(expected_output_node, cur_input_node)
-    #cost_node = SigmoidCrossEntropyNode(expected_output_node, cur_input_node)
+    #diff_node = SubstractionNode([expected_output_node, cur_input_node])
+    #cost_node = Norm2Node([diff_node])
+    cost_node = SoftmaxCrossEntropyNode([expected_output_node, cur_input_node])
+    #cost_node = SigmoidCrossEntropyNode([expected_output_node, cur_input_node])
 
     nodes += [expected_output_node, cost_node]
     return Graph(nodes, [input_node], [cur_input_node], [expected_output_node], cost_node, learnable_nodes) 
