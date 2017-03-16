@@ -91,10 +91,10 @@ class GradientInputNode(Node):
         return self.value
 
 class LearnableNode(Node):
-    def __init__(self, w):
+    def __init__(self, w, acc_dJdw=None):
         Node.__init__(self)
         self.w = w
-        self.acc_dJdw = np.zeros(self.w.shape)
+        self.acc_dJdw = np.zeros(self.w.shape) if acc_dJdw is None else acc_dJdw
 
     def compute_output(self):
         return [self.w]
@@ -107,11 +107,11 @@ class LearnableNode(Node):
         self.w -= (learning_rate/batch_size)*self.acc_dJdw
 
     def reset_accumulator(self):
-        self.acc_dJdw = np.zeros(self.w.shape)
+        self.acc_dJdw.fill(0)
 
     def clone(self):
         # The weights are always shared between the clones
-        return LearnableNode(self.w)
+        return LearnableNode(self.w, self.acc_dJdw)
         
 class FunctionNode(Node):
     def __init__(self, parent=None):
