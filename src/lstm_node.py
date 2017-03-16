@@ -13,33 +13,33 @@ class LSTMNode(CompositeNode):
 		self.s_in = InputNode()
 
 		# Define c the concatenation of h and x
-		self.c = ConcatenationNode(self.h_in, self.x)
+		self.c = ConcatenationNode([self.h_in, self.x])
 		self.dim_c = self.dim_s + self.dim_x
 
 		# g
 		self.wg = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
-		self.mg = MultiplicationNode(self.c, self.wg)
-		self.g = SigmoidNode(self.mg)
+		self.mg = MultiplicationNode([self.c, self.wg])
+		self.g = SigmoidNode([self.mg])
 
 		# i
 		self.wi = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
-		self.mi = MultiplicationNode(self.c, self.wi)
-		self.i = TanhNode(self.mi)
+		self.mi = MultiplicationNode([self.c, self.wi])
+		self.i = TanhNode([self.mi])
 
 		# Define a what we add to s
-		self.a = EWMultiplicationNode(self.g, self.i)
-		self.s_out = AdditionNode(self.s_in, self.a)
+		self.a = EWMultiplicationNode([self.g, self.i])
+		self.s_out = AdditionNode([self.s_in, self.a])
 
 		# l
-		self.l = TanhNode(self.s_out)
+		self.l = TanhNode([self.s_out])
 
 		# o
 		self.wo = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
-		self.mo = MultiplicationNode(self.c, self.wo)
-		self.o = SigmoidNode(self.mo)
+		self.mo = MultiplicationNode([self.c, self.wo])
+		self.o = SigmoidNode([self.mo])
 
 		# Compute h_out
-		self.h_out = EWMultiplicationNode(self.l, self.o)
+		self.h_out = EWMultiplicationNode([self.l, self.o])
 
 		# Call the constructor of CompositeNode
 		nodes = [self.x, self.h_in, self.s_in, self.c, self.wg, self.mg, self.g, self.wi, self.mi, \
@@ -83,44 +83,44 @@ class LSTMWFGNode(CompositeNode):
 		self.s_in = InputNode()
 
 		# Define c the concatenation of h and x and add bias
-		self.hx = ConcatenationNode(self.h_in, self.x)
-		self.c = AddBiasNode(self.hx)
+		self.hx = ConcatenationNode([self.h_in, self.x])
+		self.c = AddBiasNode([self.hx])
 		self.dim_c = self.dim_s + self.dim_x + 1
 
 		# g
 		self.wg = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
-		self.mg = MultiplicationNode(self.c, self.wg)
-		self.g = SigmoidNode(self.mg)
+		self.mg = MultiplicationNode([self.c, self.wg])
+		self.g = SigmoidNode([self.mg])
 
 		# i
 		self.wi = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
-		self.mi = MultiplicationNode(self.c, self.wi)
-		self.i = TanhNode(self.mi)
+		self.mi = MultiplicationNode([self.c, self.wi])
+		self.i = TanhNode([self.mi])
 
 		# f
 		self.wf = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
 		# Set biases to 1, in order to let something pass the forget gate in the first steps
 		self.wf.w[0,:] = np.ones(dim_s)
-		self.mf = MultiplicationNode(self.c, self.wf)
-		self.f = SigmoidNode(self.mf)
+		self.mf = MultiplicationNode([self.c, self.wf])
+		self.f = SigmoidNode([self.mf])
 
 		# Define k what we keep from s
-		self.k = EWMultiplicationNode(self.f, self.s_in)
+		self.k = EWMultiplicationNode([self.f, self.s_in])
 
 		# Define a what we add to k
-		self.a = EWMultiplicationNode(self.g, self.i)
-		self.s_out = AdditionNode(self.k, self.a)
+		self.a = EWMultiplicationNode([self.g, self.i])
+		self.s_out = AdditionNode([self.k, self.a])
 
 		# l
-		self.l = TanhNode(self.s_out)
+		self.l = TanhNode([self.s_out])
 
 		# o
 		self.wo = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
-		self.mo = MultiplicationNode(self.c, self.wo)
-		self.o = SigmoidNode(self.mo)
+		self.mo = MultiplicationNode([self.c, self.wo])
+		self.o = SigmoidNode([self.mo])
 
 		# Compute h_out
-		self.h_out = EWMultiplicationNode(self.l, self.o)
+		self.h_out = EWMultiplicationNode([self.l, self.o])
 
 		# Call the constructor of CompositeNode
 		nodes = [self.x, self.h_in, self.s_in, self.hx, self.c, self.wg, self.mg, self.g, self.wi, self.mi, \
