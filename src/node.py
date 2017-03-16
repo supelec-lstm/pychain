@@ -207,74 +207,56 @@ class SelectionNode(Node):
     def clone(self):
         return SelectionNode(start=self.start, end=self.end)
 
-class BinaryOpNode(Node):
-    def __init__(self, parent1=None, parent2=None):
-        if parent1 is None and parent2 is None:
-            Node.__init__(self)
-        else:
-            Node.__init__(self, [parent1, parent2])
-
-    def get_output(self, i_output=0):
-        if self.output_dirty:
-            self.x = [parent.get_output(i_parent_output) for (parent, i_parent_output) in self.parents]
-            self.y = self.compute_output()
-        return self.y
-
-    def get_gradient(self, i_child_input=0):
-        if self.gradient_dirty:
-            self.dJdy = np.sum(child.get_gradient(i) for child, i in self.children[0])
-            self.dJdx = self.compute_gradient()
-        return self.dJdx[i_child_input]
-
-class AdditionNode(BinaryOpNode):
+class AdditionNode(Node):
     def compute_output(self):
-        return self.x[0] + self.x[1]
+        return [self.x[0] + self.x[1]]
 
     def compute_gradient(self):
-        return [self.dJdy, self.dJdy]
+        return [self.dJdy[0], self.dJdy[0]]
 
-class SubstractionNode(BinaryOpNode):
+class SubstractionNode(Node):
     def compute_output(self):
-        return self.x[0] - self.x[1]
+        return [self.x[0] - self.x[1]]
     
     def compute_gradient(self):
-        return [self.dJdy, -self.dJdy]
+        return [self.dJdy[0], -self.dJdy[0]]
 
-class MultiplicationNode(BinaryOpNode):
+class MultiplicationNode(Node):
     def compute_output(self):
-        return np.dot(self.x[0], self.x[1])
+        return [np.dot(self.x[0], self.x[1])]
 
     def compute_gradient(self):
-        return [np.dot(self.dJdy, self.x[1].T), np.dot(self.x[0].T, self.dJdy)]
+        return [np.dot(self.dJdy[0], self.x[1].T), np.dot(self.x[0].T, self.dJdy[0])]
 
 # Element wise multiplication
-class EWMultiplicationNode(BinaryOpNode):
+class EWMultiplicationNode(Node):
     def compute_output(self):
-        return self.x[0] * self.x[1]
+        return [self.x[0] * self.x[1]]
 
     def compute_gradient(self):
-        return [self.dJdy*self.x[1], self.dJdy*self.x[0]]
+        return [self.dJdy[0]*self.x[1], self.dJdy[0]*self.x[0]]
 
-class  ConcatenationNode(BinaryOpNode):
+class  ConcatenationNode(Node):
     def compute_output(self):
-        return np.concatenate((self.x[0], self.x[1]), axis=1)
+        return [np.concatenate((self.x[0], self.x[1]), axis=1)]
 
     def compute_gradient(self):
-        return [self.dJdy[:,:self.x[0].shape[1]], self.dJdy[:,self.x[0].shape[1]:]]
+        return [self.dJdy[0][:,:self.x[0].shape[1]], self.dJdy[0][:,self.x[0].shape[1]:]]
 
-class SoftmaxCrossEntropyNode(BinaryOpNode):
+class SoftmaxCrossEntropyNode(Node):
     def compute_output(self):
-        return -np.sum(self.x[0]*np.log(self.x[1]))
+        return [-np.sum(self.x[0]*np.log(self.x[1]))]
 
     def compute_gradient(self):
-        return [-self.dJdy*np.log(self.x[1]), -self.dJdy*(self.x[0]/self.x[1])]
+        return [-self.dJdy[0]*np.log(self.x[1]), -self.dJdy[0]*(self.x[0]/self.x[1])]
 
-class SigmoidCrossEntropyNode(BinaryOpNode):
+class SigmoidCrossEntropyNode(Node):
     def compute_output(self):
-        return -np.sum((self.x[0]*np.log(self.x[1]) + (1-self.x[0])*np.log(1-self.x[1])))
+        return [-np.sum((self.x[0]*np.log(self.x[1]) + (1-self.x[0])*np.log(1-self.x[1])))]
 
     def compute_gradient(self):
-        return [-self.dJdy*(np.log(self.x[1]/(1-self.x[1]))), -self.dJdy*(self.x[0]/self.x[1]-(1-self.x[0])/(1-self.x[1]))]
+        return [-self.dJdy[0]*(np.log(self.x[1]/(1-self.x[1]))), \
+            -self.dJdy[0]*(self.x[0]/self.x[1]-(1-self.x[0])/(1-self.x[1]))]
 
 class SumNode(Node):
     def compute_output(self):

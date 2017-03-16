@@ -177,7 +177,7 @@ def test_learnable_node():
 def test_addition_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2], [3, 3]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4], [5, 6]]))
-	node_add = AdditionNode(node_in1, node_in2)
+	node_add = AdditionNode([node_in1, node_in2])
 	node_fun = Norm2Node([node_add])
 	node_out = GradientInputNode([node_fun])
 
@@ -191,7 +191,7 @@ def test_addition_node():
 def test_substraction_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2], [3, 3]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4], [5, 6]]))
-	node_sub = SubstractionNode(node_in1, node_in2)
+	node_sub = SubstractionNode([node_in1, node_in2])
 	node_fun = Norm2Node([node_sub])
 	node_out = GradientInputNode([node_fun])
 
@@ -204,7 +204,7 @@ def test_substraction_node():
 def test_multiplication_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
-	node_dot = MultiplicationNode(node_in1, node_in2)
+	node_dot = MultiplicationNode([node_in1, node_in2])
 	node_fun = Norm2Node([node_dot])
 	node_out = GradientInputNode([node_fun])
 
@@ -216,7 +216,7 @@ def test_multiplication_node():
 def test_ew_multiplication_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
-	node_dot = EWMultiplicationNode(node_in1, node_in2)
+	node_dot = EWMultiplicationNode([node_in1, node_in2])
 	node_fun = Norm2Node([node_dot])
 	node_out = GradientInputNode([node_fun])
 
@@ -228,7 +228,7 @@ def test_ew_multiplication_node():
 def test_concatenate_node():
     node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
     node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
-    node_conca =  ConcatenationNode(node_in1, node_in2)
+    node_conca =  ConcatenationNode([node_in1, node_in2])
     node_fun = Norm2Node([node_conca])
     node_out = GradientInputNode([node_fun])
 
@@ -240,7 +240,7 @@ def test_concatenate_node():
 def test_softmax_cross_entropy_node():
 	node_in1 = InputNode(np.array([[1, 1], [2, 2]]))
 	node_in2 = InputNode(np.array([[1, 2], [3, 4]]))
-	node_sce = SoftmaxCrossEntropyNode(node_in1, node_in2)
+	node_sce = SoftmaxCrossEntropyNode([node_in1, node_in2])
 	node_out = GradientInputNode([node_sce])
 
 	assert node_sce.get_output() == - (0 + np.log(2) + 2*np.log(3) + 2*np.log(4))
@@ -251,7 +251,7 @@ def test_softmax_cross_entropy_node():
 def test_sigmoid_cross_entropy_node():
 	node_in1 = InputNode(np.array([[1, 0], [0.5, 0.7]]))
 	node_in2 = InputNode(np.array([[0.9, 0.3], [0.4, 0.8]]))
-	node_sce = SigmoidCrossEntropyNode(node_in1, node_in2)
+	node_sce = SigmoidCrossEntropyNode([node_in1, node_in2])
 	node_out = GradientInputNode([node_sce])
 
 	y = -np.log(0.9) - np.log(0.7) - (0.5*np.log(0.4)+0.5*np.log(0.6)) - (0.7*np.log(0.8)+0.3*np.log(0.2))
