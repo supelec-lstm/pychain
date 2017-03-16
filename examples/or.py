@@ -32,12 +32,12 @@ def visualize(graph, n):
 
 if __name__ == '__main__':
 	input_node = InputNode()
-	bias_node = AddBiasNode(input_node)
+	bias_node = AddBiasNode([input_node])
 	weights_node = LearnableNode(np.random.rand(3, 1))
-	prod_node = MultiplicationNode(bias_node, weights_node)
-	output_node = SigmoidNode(prod_node)
+	prod_node = MultiplicationNode([bias_node, weights_node])
+	output_node = SigmoidNode([prod_node])
 	expected_output_node = InputNode()
-	cost_node = SigmoidCrossEntropyNode(expected_output_node, output_node)
+	cost_node = SigmoidCrossEntropyNode([expected_output_node, output_node])
 	nodes = [input_node, bias_node, weights_node, prod_node, output_node, expected_output_node, \
 		cost_node]
 	graph = Graph(nodes, [input_node], [output_node], [expected_output_node], cost_node, [weights_node])
