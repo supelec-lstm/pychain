@@ -82,9 +82,10 @@ class LSTMWFGNode(CompositeNode):
 		self.h_in = InputNode()
 		self.s_in = InputNode()
 
-		# Define c the concatenation of h and x
-		self.c = ConcatenationNode(self.h_in, self.x)
-		self.dim_c = self.dim_s + self.dim_x
+		# Define c the concatenation of h and x and add bias
+		self.hx = ConcatenationNode(self.h_in, self.x)
+		self.c = AddBiasNode(self.hx)
+		self.dim_c = self.dim_s + self.dim_x + 1
 
 		# g
 		self.wg = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
@@ -98,6 +99,8 @@ class LSTMWFGNode(CompositeNode):
 
 		# f
 		self.wf = LearnableNode(0.1 * np.random.randn(self.dim_c, self.dim_s))
+		# Set biases to 1, in order to let something pass the forget gate in the first steps
+		self.wf.w[0,:] = np.ones(dim_s)
 		self.mf = MultiplicationNode(self.c, self.wf)
 		self.f = SigmoidNode(self.mf)
 
@@ -120,7 +123,7 @@ class LSTMWFGNode(CompositeNode):
 		self.h_out = EWMultiplicationNode(self.l, self.o)
 
 		# Call the constructor of CompositeNode
-		nodes = [self.x, self.h_in, self.s_in, self.c, self.wg, self.mg, self.g, self.wi, self.mi, \
+		nodes = [self.x, self.h_in, self.s_in, self.hx, self.c, self.wg, self.mg, self.g, self.wi, self.mi, \
 			self.i, self.wf, self.mf, self.f, self.k, self.a, self.s_out, self.l, self.wo, self.mo, \
 			self.o, self.h_out]
 		CompositeNode.__init__(self, nodes, [self.x, self.h_in, self.s_in], [self.h_out, self.s_out], \
@@ -133,24 +136,25 @@ class LSTMWFGNode(CompositeNode):
 		node.x = nodes[0]
 		node.h_in = nodes[1]
 		node.s_in = nodes[2]
-		node.c = nodes[3]
-		node.wg = nodes[4]
-		node.mg = nodes[5]
-		node.g = nodes[6]
-		node.wi = nodes[7]
-		node.mi = nodes[8]
-		node.i = nodes[9]
-		node.wf = nodes[10]
-		node.mf = nodes[11]
-		node.f = nodes[12]
-		node.k = nodes[13]
-		node.a = nodes[14]
-		node.s_out = nodes[15]
-		node.l = nodes[16]
-		node.wo = nodes[17]
-		node.mo = nodes[18]
-		node.o = nodes[19]
-		node.h_out = nodes[20]
+		node.hx = nodes[3]
+		node.c = nodes[4]
+		node.wg = nodes[5]
+		node.mg = nodes[6]
+		node.g = nodes[7]
+		node.wi = nodes[8]
+		node.mi = nodes[9]
+		node.i = nodes[10]
+		node.wf = nodes[11]
+		node.mf = nodes[12]
+		node.f = nodes[13]
+		node.k = nodes[14]
+		node.a = nodes[15]
+		node.s_out = nodes[16]
+		node.l = nodes[17]
+		node.wo = nodes[18]
+		node.mo = nodes[19]
+		node.o = nodes[20]
+		node.h_out = nodes[21]
 		return node
 
 
