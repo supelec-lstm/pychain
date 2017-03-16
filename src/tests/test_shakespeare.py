@@ -49,8 +49,8 @@ def create_layer():
         lstm.learnable_nodes[0].w = np.ones((dim_x + dim_s, dim_s))
         lstm.learnable_nodes[1].w = np.ones((dim_x + dim_s, dim_s))
         lstm.learnable_nodes[2].w = np.ones((dim_x + dim_s, dim_s))
-        h_out = IdentityNode((lstm, 0))
-        s_out = IdentityNode((lstm, 1))
+        h_out = IdentityNode([(lstm, 0)])
+        s_out = IdentityNode([(lstm, 1)])
         parent = h_out
         # Add to containers
         hidden_inputs += [h_in, s_in]
@@ -58,12 +58,12 @@ def create_layer():
         lstms.append(lstm)
     # Softmax
     w = LearnableNode(np.ones((dim_s, len(letters))))
-    mult = MultiplicationNode(parent, w)
-    out = SoftmaxNode(mult)
+    mult = MultiplicationNode([parent, w])
+    out = SoftmaxNode([mult])
     # Cost
     y = InputNode()
-    e = SubstractionNode(y, out)
-    cost = Norm2Node(e)
+    e = SubstractionNode([y, out])
+    cost = Norm2Node([e])
 
     nodes = hidden_inputs + hidden_outputs + lstms + [x, w, mult, out, y, e, cost]
     return Layer(nodes, [x], [out], hidden_inputs, hidden_outputs, [y], cost, [w] + lstms)

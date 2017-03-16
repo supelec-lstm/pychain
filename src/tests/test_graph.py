@@ -13,10 +13,10 @@ def init_ones(shape):
 def test_simple_graph():
 	input_node = InputNode()
 	weights_node = LearnableNode(init_ones((3, 1)))
-	output_node = MultiplicationNode(input_node, weights_node)
+	output_node = MultiplicationNode([input_node, weights_node])
 	expected_output_node = InputNode()
-	sub_node = SubstractionNode(output_node, expected_output_node)
-	cost_node = Norm2Node(sub_node)
+	sub_node = SubstractionNode([output_node, expected_output_node])
+	cost_node = Norm2Node([sub_node])
 	nodes = [input_node, weights_node, output_node, expected_output_node, sub_node, cost_node]
 	graph = Graph(nodes, [input_node], [output_node], [expected_output_node], cost_node, [weights_node])
 

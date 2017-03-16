@@ -54,12 +54,12 @@ def create_layer():
     lstm.learnable_nodes[1].w = np.ones((2 * len(letters), len(letters)))
     lstm.learnable_nodes[2].w = np.ones((2 * len(letters), len(letters)))
     # Outputs
-    h_out = IdentityNode((lstm, 0))
-    s_out = IdentityNode((lstm, 1))
+    h_out = IdentityNode([(lstm, 0)])
+    s_out = IdentityNode([(lstm, 1)])
     # Cost
     y = InputNode(4)
-    e = SubstractionNode(y, h_out)
-    cost = Norm2Node(e)
+    e = SubstractionNode([y, h_out])
+    cost = Norm2Node([e])
 
     nodes = [x, h_in, s_in, lstm, h_out, s_out, y, e, cost]
     return Layer(nodes, [x], [h_out], [h_in, s_in], [h_out, s_out], [y], cost, [lstm])

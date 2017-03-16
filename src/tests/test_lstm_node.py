@@ -35,12 +35,12 @@ def layer1():
     lstm.learnable_nodes[1].w = np.ones((dim_x + dim_s, dim_s))
     lstm.learnable_nodes[2].w = np.ones((dim_x + dim_s, dim_s))
     # Outputs
-    h_out = IdentityNode((lstm, 0))
-    s_out = IdentityNode((lstm, 1))
+    h_out = IdentityNode([(lstm, 0)])
+    s_out = IdentityNode([(lstm, 1)])
     # Cost
     y = InputNode(4)
-    e = SubstractionNode(y, h_out)
-    cost = Norm2Node(e)
+    e = SubstractionNode([y, h_out])
+    cost = Norm2Node([e])
 
     nodes = [x, h_in, s_in, lstm, h_out, s_out, y, e, cost]
     return Layer(nodes, [x], [h_out], [h_in, s_in], [h_out, s_out], [y], cost, [lstm])
@@ -84,8 +84,8 @@ def test_backpropagation1(node1):
     node_dh = GradientInputNode([(node, 0)], dh)
     node_ds = GradientInputNode([(node, 1)], ds)
     node_y = InputNode(y)
-    sub_node = SubstractionNode((node, 0), node_y)
-    norm2_node = Norm2Node(sub_node)
+    sub_node = SubstractionNode([(node, 0), node_y])
+    norm2_node = Norm2Node([sub_node])
     gradient_node = GradientInputNode([norm2_node])
 
     output = norm2_node.get_output()

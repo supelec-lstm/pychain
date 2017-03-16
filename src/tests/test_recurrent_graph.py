@@ -17,8 +17,8 @@ def init_ones(shape):
 def layer1():
 	input_node = InputNode()
 	expected_output = InputNode()
-	substraction_node = SubstractionNode(expected_output, input_node)
-	cost_node = Norm2Node(substraction_node)
+	substraction_node = SubstractionNode([expected_output, input_node])
+	cost_node = Norm2Node([substraction_node])
 	nodes = [input_node, expected_output, substraction_node, cost_node]
 	return Layer(nodes, [input_node], [input_node], [], [], [expected_output], cost_node, [])
 
@@ -26,10 +26,10 @@ def layer1():
 def layer2():
 	input_node = InputNode()
 	learnable_node = LearnableNode(init_ones((1, 1)))
-	multiplication_node = MultiplicationNode(input_node, learnable_node)
+	multiplication_node = MultiplicationNode([input_node, learnable_node])
 	expected_output = InputNode()
-	substraction_node = SubstractionNode(expected_output, multiplication_node)
-	cost_node = Norm2Node(substraction_node)
+	substraction_node = SubstractionNode([expected_output, multiplication_node])
+	cost_node = Norm2Node([substraction_node])
 	nodes = [input_node, learnable_node, multiplication_node, expected_output, substraction_node, cost_node]
 	return Layer(nodes, [input_node], [multiplication_node], [], [], [expected_output], \
 		cost_node, [learnable_node])
@@ -38,12 +38,12 @@ def layer2():
 def layer3():
 	input_node = InputNode()
 	hidden_input_node = InputNode()
-	concatenation_node = ConcatenationNode(input_node, hidden_input_node)
+	concatenation_node = ConcatenationNode([input_node, hidden_input_node])
 	learnable_node = LearnableNode(init_ones((2, 1)))
-	multiplication_node = MultiplicationNode(concatenation_node, learnable_node)
+	multiplication_node = MultiplicationNode([concatenation_node, learnable_node])
 	expected_output = InputNode()
-	substraction_node = SubstractionNode(expected_output, multiplication_node)
-	cost_node = Norm2Node(substraction_node)
+	substraction_node = SubstractionNode([expected_output, multiplication_node])
+	cost_node = Norm2Node([substraction_node])
 	nodes = [input_node, hidden_input_node, concatenation_node, learnable_node, \
 		multiplication_node, expected_output, substraction_node, cost_node]
 	return Layer(nodes, [input_node], [multiplication_node], [hidden_input_node], [multiplication_node], \
@@ -54,17 +54,17 @@ def layer4():
 	# A deeper network
 	input_node = InputNode()
 	hidden_input_node = InputNode()
-	concatenation_node = ConcatenationNode(input_node, hidden_input_node)
+	concatenation_node = ConcatenationNode([input_node, hidden_input_node])
 	learnable_node1 = LearnableNode(init_ones((3, 2)))
-	multiplication_node1 = MultiplicationNode(concatenation_node, learnable_node1)
-	hidden_output_node = TanhNode(multiplication_node1)
+	multiplication_node1 = MultiplicationNode([concatenation_node, learnable_node1])
+	hidden_output_node = TanhNode([multiplication_node1])
 
 	learnable_node2 = LearnableNode(init_ones((2, 1)))
-	multiplication_node2 = MultiplicationNode(hidden_output_node, learnable_node2)
-	sigmoid_node = SigmoidNode(multiplication_node2)
+	multiplication_node2 = MultiplicationNode([hidden_output_node, learnable_node2])
+	sigmoid_node = SigmoidNode([multiplication_node2])
 	expected_output = InputNode()
-	substraction_node = SubstractionNode(expected_output, sigmoid_node)
-	cost_node = Norm2Node(substraction_node)
+	substraction_node = SubstractionNode([expected_output, sigmoid_node])
+	cost_node = Norm2Node([substraction_node])
 
 	nodes = [input_node, hidden_input_node, concatenation_node, learnable_node1, \
 		multiplication_node1, hidden_output_node, learnable_node2, multiplication_node2, \
@@ -77,13 +77,13 @@ def layer5():
 	# for the comparison with RTRL
 	input_node = InputNode()
 	hidden_input_node = InputNode()
-	concatenation_node = ConcatenationNode(input_node, hidden_input_node)
+	concatenation_node = ConcatenationNode([input_node, hidden_input_node])
 	learnable_node = LearnableNode(init_ones((2, 1)))
-	multiplication_node = MultiplicationNode(concatenation_node, learnable_node)
-	sigmoid_node = SigmoidNode(multiplication_node)
+	multiplication_node = MultiplicationNode([concatenation_node, learnable_node])
+	sigmoid_node = SigmoidNode([multiplication_node])
 	expected_output = InputNode()
-	substraction_node = SubstractionNode(expected_output, sigmoid_node)
-	cost_node = Norm2Node(substraction_node)
+	substraction_node = SubstractionNode([expected_output, sigmoid_node])
+	cost_node = Norm2Node([substraction_node])
 	nodes = [input_node, hidden_input_node, concatenation_node, learnable_node, \
 		     multiplication_node, sigmoid_node, expected_output, substraction_node, cost_node]
 	return Layer(nodes, [input_node], [sigmoid_node], [hidden_input_node], [sigmoid_node], \
