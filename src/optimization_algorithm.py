@@ -54,3 +54,20 @@ class AdaGrad(OptimizationAlgorithm):
 			node.w -= self.learning_rate * grad/(self.epsilon + np.sqrt(self.new_accumulator[i]))
 		self.reset_accumulators()
 
+class AdaDelta(OptimizationAlgorithm):
+	def __init__(self, learnable_nodes, learning_rate, gamma=0.95, epsilon=1e-6):
+		OptimizationAlgorithm.__init__(self, learnable_nodes)
+		self.learning_rate = learning_rate
+		self.gamma = gamma
+		self.epsilon = epsilon
+		self.new_accumulator = [np.zeros(node.w.shape) for node in self.learnable_nodes]
+		self.delta_accumulator = [np.zeros(node.w.shape) for node in self.learnable_nodes]
+
+	def optimize(self, batch_size=1):
+		for i, node in enumerate(self.learnable_nodes):
+			grad = node.acc_dJdw/batch_size
+			self.new_accumulator[i] = self.gamma * self.new_accumulator[i] + (1-self.gamma)*(grad**2)
+			update = grad * np.sqrt(self.delta_accumulator[i] + self.epsilon)/np.sqrt(self.new_accumulator[i] + self.epsilon)
+			node.w -= self.learning_rate * update
+			self.delta_accumulator[i] = self.gamma * self.delta_accumulator[i] + (1-self.gamma)*(update**2)
+		self.reset_accumulators()
