@@ -44,7 +44,8 @@ def learn_shakespeare(layer):
     # Create the graph
     graph = RecurrentGraph(layer, len_seq - 1, hidden_shapes)
     # Optimization algorithm
-    algo = GradientDescent(graph.get_learnable_nodes(), learning_rate)
+    #algo = GradientDescent(graph.get_learnable_nodes(), learning_rate)
+    algo = RMSProp(graph.get_learnable_nodes(), learning_rate, 0.95)
     # Learn
     i_pass = 1
     i_batch = 1
