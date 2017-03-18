@@ -40,16 +40,17 @@ class RMSProp(OptimizationAlgorithm):
 			node.w -= self.learning_rate * grad / np.sqrt(self.r[i] + self.delta)
 		self.reset_accumulators()
 
-class Adagrad(OptimizationAlgorithm):
-	def __init__(self, learnable_nodes, learning_rate = 0.01, epsilon = 0.000001):
+class AdaGrad(OptimizationAlgorithm):
+	def __init__(self, learnable_nodes, learning_rate, epsilon=1e-6):
 		OptimizationAlgorithm.__init__(self, learnable_nodes)
 		self.learning_rate = learning_rate
 		self.epsilon = epsilon
 		self.new_accumulator = [np.zeros(node.w.shape) for node in self.learnable_nodes]
 
-	def optimize(self, batch_size = 1):
+	def optimize(self, batch_size=1):
 		for i, node in enumerate(self.learnable_nodes):
 			grad = node.acc_dJdw/batch_size
 			self.new_accumulator[i] += grad**2
 			node.w -= self.learning_rate * grad/(self.epsilon + np.sqrt(self.new_accumulator[i]))
 		self.reset_accumulators()
+
