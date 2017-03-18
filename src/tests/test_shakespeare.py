@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../../src')))
 from lstm_node import *
 from layer import *
 from recurrent_graph import *
+from optimization_algorithm import *
 
 letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',\
             'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',\
@@ -74,6 +75,7 @@ def test_keep_same_network():
 
     # For layer1 we create an unique graph
     graph1 = RecurrentGraph(layer1, len_seq - 1, hidden_shapes)
+    sgd1 = GradientDescent(graph1.get_learnable_nodes(), learning_rate)
 
     # Number of iterations
     N = 10
@@ -91,13 +93,14 @@ def test_keep_same_network():
         # Graph1
         outputs1 = graph1.propagate(sequence[:-1])
         graph1.backpropagate(sequence[1:])
-        graph1.descend_gradient(learning_rate)
+        sgd1.optimize()
 
         # For layer2, we create a new graph at each iteration
         graph2 = RecurrentGraph(layer2, len_seq - 1, hidden_shapes)
+        sgd2 = GradientDescent(graph2.get_learnable_nodes(), learning_rate)
         outputs2 = graph2.propagate(sequence[:-1])
         graph2.backpropagate(sequence[1:])
-        graph2.descend_gradient(learning_rate)
+        sgd2.optimize()
 
         # Test
         print(outputs1[0])

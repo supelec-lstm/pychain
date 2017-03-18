@@ -14,6 +14,7 @@ from lstm_node import *
 from layer import *
 from recurrent_graph import *
 from lstm import *
+from optimization_algorithm import *
 
 letters = ['B', 'T', 'P', 'S', 'X', 'V', 'E']
 letter_to_index = {letter: i for i, letter in enumerate(letters)}
@@ -107,9 +108,10 @@ def test_backpropagate():
         layer = create_layer()
         sequence = string_to_sequence_line(string)
         graph = RecurrentGraph(layer, len(sequence)-1, [(1, 7), (1, 7)])
+        sgd = GradientDescent(graph.get_learnable_nodes(), learning_rate)
         graph.propagate(sequence[:-1])
         graph.backpropagate(sequence[1:])
-        graph.descend_gradient(learning_rate)
+        sgd.optimize()
 
         # Check costs
         for cell, layer in zip(reversed(network.cells), reversed(graph.layers)):

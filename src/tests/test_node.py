@@ -168,9 +168,6 @@ def test_learnable_node():
 	learnable_node.get_gradient(0)
 	assert np.array_equal(learnable_node.acc_dJdw, 4*np.ones((3, 2)))
 
-	learnable_node.descend_gradient(0.7, 13)
-	assert np.array_equal(learnable_node.w, (1 - 4*0.7/13) * np.ones((3, 2)))
-
 	learnable_node.reset_accumulator()
 	assert np.array_equal(learnable_node.acc_dJdw, np.zeros((3, 2)))
 

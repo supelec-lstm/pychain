@@ -9,6 +9,7 @@ from node import *
 from graph import *
 from layer import *
 from recurrent_graph import *
+from optimization_algorithm import *
 
 def init_ones(shape):
 	return np.ones(shape)
@@ -104,17 +105,19 @@ def test_propagate1(layer3):
 
 def test_backpropagate1(layer3):
 	recurrent_graph = RecurrentGraph(layer3, 1, [(1, 1)])
+	sgd = GradientDescent(recurrent_graph.get_learnable_nodes(), 0.1)
 	recurrent_graph.propagate([np.array([[2]])])
 	cost = recurrent_graph.backpropagate([np.array([[5]])])
-	recurrent_graph.descend_gradient(0.1)
+	sgd.optimize()
 	assert cost == 9
 	assert np.array_equal(recurrent_graph.layers[0].learnable_nodes[0].w, np.array([[2.2], [1]]))
 
 def test_backpropagate2(layer3):
 	recurrent_graph = RecurrentGraph(layer3, 2, [(1, 1)])
+	sgd = GradientDescent(recurrent_graph.get_learnable_nodes(), 0.1)
 	recurrent_graph.propagate([np.array([[2]]), np.array([[1]])])
 	cost = recurrent_graph.backpropagate([np.array([[5]]), np.array([[2]])])
-	recurrent_graph.descend_gradient(0.1)
+	sgd.optimize()
 	assert cost == 10
 	assert np.array_equal(recurrent_graph.layers[0].learnable_nodes[0].w, np.array([[1.6], [0.6]]))
 
@@ -130,9 +133,10 @@ def test_propagate2(layer4):
 
 def test_backpropagate3(layer4):
 	recurrent_graph = RecurrentGraph(layer4, 2, [(1, 2)])
+	sgd = GradientDescent(recurrent_graph.get_learnable_nodes(), 0.1)
 	recurrent_graph.propagate([np.array([[2]]), np.array([[5]])])
 	cost = recurrent_graph.backpropagate([np.array([[3]]), np.array([[2]])])
-	recurrent_graph.descend_gradient(0.1)
+	sgd.optimize()
 
 	h1 = np.tanh(2)
 	h2 = np.tanh(5+2*np.tanh(2))
@@ -166,9 +170,10 @@ def test_propagate3(layer5):
 
 def test_backpropagation4(layer5):
 	recurrent_graph = RecurrentGraph(layer5, 2, [(1, 1)])
+	sgd = GradientDescent(recurrent_graph.get_learnable_nodes(), 1)
 	output = recurrent_graph.propagate([np.array([[1]]), np.array([[2]])])
 	cost = recurrent_graph.backpropagate([np.array([[2]]), np.array([[3]])])
-	recurrent_graph.descend_gradient(1)
+	sgd.optimize()
 	
 	expected_cost = 5.8586149168896
 	assert cost == expected_cost
