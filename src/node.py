@@ -96,7 +96,6 @@ class LearnableNode(Node):
         Node.__init__(self)
         self.w = w
         self.acc_dJdw = np.zeros(self.w.shape) if acc_dJdw is None else acc_dJdw
-        #self.rms = np.zeros(self.w.shape)
 
     def compute_output(self):
         return [self.w]
@@ -105,20 +104,16 @@ class LearnableNode(Node):
         self.acc_dJdw += self.dJdy[0]
         return self.dJdy
 
-    def descend_gradient(self, learning_rate, batch_size):
-        #self.rms = 0.9*self.rms + 0.1*np.square(self.acc_dJdw)
-        #self.acc_dJdw /= np.sqrt(self.rms + 0.0001)
-        #self.acc_dJdw.clip(-5, 5)
-        self.w -= (learning_rate/batch_size)*self.acc_dJdw
-        #self.w -= (learning_rate/batch_size)*np.clip(self.acc_dJdw, -5, 5)
-        #self.w -= (learning_rate/batch_size) / np.sqrt(self.rms + 0.0001) * self.acc_dJdw
-
     def reset_accumulator(self):
         self.acc_dJdw.fill(0)
 
     def clone(self):
         # The weights are always shared between the clones
         return LearnableNode(self.w, self.acc_dJdw)
+
+    # For the optimization algorithms
+    def get_learnable_nodes(self):
+        return [self]
 
 class AddBiasNode(Node):
     def compute_output(self):

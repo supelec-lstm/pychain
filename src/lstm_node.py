@@ -156,7 +156,3 @@ class LSTMWFGNode(CompositeNode):
 		node.o = nodes[20]
 		node.h_out = nodes[21]
 		return node
-
-
-
-

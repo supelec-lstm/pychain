@@ -47,16 +47,9 @@ class RecurrentGraph:
 			total_cost += cost
 		return total_cost
 
-	def descend_gradient(self, learning_rate, batch_size=1):
-		if len(self.layers) > 0:
-			self.layers[0].descend_gradient(learning_rate, batch_size)
-		# Reset accumulators
-		self.reset_accumulators()
-
 	def reset_memoization(self):
 		for layer in self.layers:
 			layer.reset_memoization()
 
-	def reset_accumulators(self):
-		for layer in self.layers:
-			layer.reset_accumulators()
+	def get_learnable_nodes(self):
+		return self.layers[0].get_learnable_nodes()

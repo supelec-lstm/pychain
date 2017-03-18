@@ -48,17 +48,16 @@ class Layer:
         # Return dJdH_in and the cost
         return [node.get_gradient(0) for node in self.hidden_input_nodes], cost
 
-    def descend_gradient(self, learning_rate, batch_size=1):
-        for node in self.learnable_nodes:
-            node.descend_gradient(learning_rate, batch_size)
-
     def reset_memoization(self):
         for node in self.nodes:
             node.reset_memoization()
 
-    def reset_accumulators(self):
+    def get_learnable_nodes(self):
+        # Retrieve the learnable nodes contained inside composite nodes
+        nodes = []
         for node in self.learnable_nodes:
-            node.reset_accumulator()
+            nodes += node.get_learnable_nodes()
+        return nodes
 
     def clone(self):
         # Duplicate nodes

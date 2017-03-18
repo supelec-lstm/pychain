@@ -32,10 +32,6 @@ class CompositeNode(LearnableNode):
         # Backpropagate
         return [node.get_gradient() for node in self.input_nodes]
 
-    def descend_gradient(self, learning_rate, batch_size):
-        for node in self.learnable_nodes:
-            node.descend_gradient(learning_rate, batch_size)
-
     def reset_memoization(self):
         # Reset memoization of the composite node
         LearnableNode.reset_memoization(self)
@@ -43,9 +39,12 @@ class CompositeNode(LearnableNode):
         for node in self.nodes:
             node.reset_memoization()
 
-    def reset_accumulator(self):
+    def get_learnable_nodes(self):
+        # Retrieve the learnable nodes contained inside composite nodes
+        nodes = []
         for node in self.learnable_nodes:
-            node.reset_accumulator()
+            nodes += node.get_learnable_nodes()
+        return nodes
 
     def clone(self):
         # Duplicate nodes
@@ -64,6 +63,3 @@ class CompositeNode(LearnableNode):
             new_node.set_parents([(keyToNode[parent.key], i_output) for parent, i_output in node.parents])
         # Return a new composite node
         return CompositeNode(nodes, input_nodes, output_nodes, learnable_nodes)
-
-
-    

@@ -26,22 +26,13 @@ class Graph:
 			node.get_gradient(0)
 		return cost
 
-	def descend_gradient(self, learning_rate, batch_size):
-		for node in self.learnable_nodes:
-			node.descend_gradient(learning_rate, batch_size)
-		self.reset_accumulators()
-
-	def batch_gradient_descent(self, X, Y, learning_rate):
-		self.propagate(X)
-		cost = self.backpropagate(Y)
-		self.descend_gradient(learning_rate, X[0].shape[0])
-		return cost
-
 	def reset_memoization(self):
 		for node in self.nodes:
 			node.reset_memoization()
 
-	def reset_accumulators(self):
+	def get_learnable_nodes(self):
+		# Retrieve the learnable nodes contained inside composite nodes
+		nodes = []
 		for node in self.learnable_nodes:
-			node.reset_accumulator()
-
+			nodes += node.get_learnable_nodes()
+		return nodes
