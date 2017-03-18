@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from lstm_node import *
 from layer import *
 from recurrent_graph import *
+from optimization_algorithm import *
 
 # Read file
 path = 'examples/shakespeare/shakespeare_karpathy.txt'
@@ -24,7 +25,7 @@ print('Vocab size:' + str(len(letters)))
 letter_to_index = {letter: i for i, letter in enumerate(letters)}
 index_to_letter = {i: letter for i, letter in enumerate(letters)}
 
-num_lstms = 2
+num_lstms = 1
 dim_s = 128
 learning_rate = 2e-3
 len_seq = 50
@@ -42,6 +43,8 @@ def string_to_sequences(string, nb_seq=1, len_seq=None):
 def learn_shakespeare(layer):
     # Create the graph
     graph = RecurrentGraph(layer, len_seq - 1, hidden_shapes)
+    # Optimization algorithm
+    algo = GradientDescent(graph.get_learnable_nodes(), learning_rate)
     # Learn
     i_pass = 1
     i_batch = 1
@@ -64,7 +67,7 @@ def learn_shakespeare(layer):
                 grad_norm += ((w.acc_dJdw/nb_seq_per_batch)**2).sum()
                 param_norm += (w.w**2).sum()
             # Desend gradient
-            graph.descend_gradient(learning_rate, nb_seq_per_batch)
+            algo.optimize(nb_seq_per_batch)
             # Print info
             print('pass: ' + str(i_pass) + ', batch: ' + str(i+1) + '/' + str(nb_batches) + \
                 ', cost: ' + str(cost) + ', time: ' + str(time.time() - t_start)  + \

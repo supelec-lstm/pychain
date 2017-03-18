@@ -11,6 +11,7 @@ import reber
 import symmetrical_reber
 from layer import *
 from recurrent_graph import *
+from optimization_algorithm import *
 
 letters = ['B', 'T', 'P', 'S', 'X', 'V', 'E']
 letter_to_index = {letter: i for i, letter in enumerate(letters)}
@@ -40,6 +41,8 @@ def train_reber(layer, N):
     f = open(train_path)
     t = []
     accuracies = []
+    # Optimization algorithm
+    sgd = GradientDescent(layer.get_learnable_nodes(), learning_rate)
     for i in range(N):
         if i % 1000 == 0:
             t.append(i)
@@ -52,7 +55,7 @@ def train_reber(layer, N):
         graph = RecurrentGraph(layer, len(sequence)-1, hidden_shapes)
         graph.propagate(sequence[:-1])
         graph.backpropagate(sequence[1:])
-        graph.descend_gradient(learning_rate)
+        sgd.optimize()
     f.close()
     """plt.plot(t, accuracies)
     plt.xlabel('Nombre de chaines')

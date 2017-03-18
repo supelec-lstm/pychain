@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from graph import *
 from node import *
+from optimization_algorithm import *
 from toy_datasets import *
 
 def evaluate(graph):
@@ -87,10 +88,13 @@ if __name__ == '__main__':
 
 	#print(rate_convergence([4, 4, 1]))
 	graph = fully_connected([4, 4, 1])
+	sgd = GradientDescent(graph.get_learnable_nodes(), 0.1)
 	for _ in range(1000):
-		print(graph.batch_gradient_descent([X], [Y], 0.1) / 4)
-		#print(type(graph.nodes[4]))
-		#print(graph.nodes[4].evaluate())
+		graph.propagate([X])
+		cost = graph.backpropagate([Y])
+		sgd.optimize(X.shape[0])
+		print(cost / 4)
+
 	evaluate(graph)
 	print(is_success(graph))
 	visualize(graph, 100)

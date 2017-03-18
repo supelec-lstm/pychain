@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from graph import *
 from node import *
+from optimization_algorithm import *
 from mnist import *
 
 def init_function(shape):
@@ -76,7 +77,9 @@ def fully_connected(layers):
 
  # Functions to benchmark: "one example at a time" performance
 
-def batch_gradient_descent_oe(graph, X, Y, i_start, i_end, learning_rate):
+ # Need to be updated
+
+"""def batch_gradient_descent_oe(graph, X, Y, i_start, i_end, learning_rate):
     total_cost = 0
     batch_size = i_end - i_start
     for x, y in zip(X[i_start:i_end], Y[i_start:i_end]):
@@ -151,7 +154,7 @@ def benchmark_with_confidence_interval():
         accuracies_test.append(accuracy(graph, X_test, Y_test))
         graph = fully_connected(layers)
     print(time.time() - start_time)
-    display_tab(['Précision sur le test set'], [accuracies_test])
+    display_tab(['Précision sur le test set'], [accuracies_test])"""
     
 
 def cost_plots():
@@ -160,10 +163,15 @@ def cost_plots():
     accuracies_training = []
     accuracies_test = []
     c = 0
+    # Optimization algorithm
+    sgd = GradientDescent(graph.get_learnable_nodes(), learning_rate)
     for j in range(nb_times_datasets):
         for i in range(0, X.shape[0], batch_size):
             print(i)
-            print(graph.batch_gradient_descent([X[i:i+batch_size]], [ohe_Y[i:i+batch_size]], learning_rate) / batch_size)
+            graph.propagate([X[i:i+batch_size]])
+            cost = graph.backpropagate([ohe_Y[i:i+batch_size]])
+            sgd.optimize(batch_size)
+            print(cost / batch_size)
             if (c % 32) == 0:
                 t.append(c)
                 accuracies_training.append(accuracy(graph, X, Y))

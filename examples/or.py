@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from graph import *
 from node import *
+from optimization_algorithm import *
 from toy_datasets import *
 
 def evaluate(graph):
@@ -41,11 +42,16 @@ if __name__ == '__main__':
 	nodes = [input_node, bias_node, weights_node, prod_node, output_node, expected_output_node, \
 		cost_node]
 	graph = Graph(nodes, [input_node], [output_node], [expected_output_node], cost_node, [weights_node])
+	# Optimization algorithm
+	sgd = GradientDescent(graph.get_learnable_nodes(), 1)
 
 	X, Y = or_dataset()
 	Y = Y.reshape((len(Y), 1))
 	for _ in range(100):
-		print(graph.batch_gradient_descent([X], [Y], 1) / 100)
+		graph.propagate([X])
+		cost = graph.backpropagate([Y])
+		sgd.optimize(X.shape[0])
+		print(cost / 100)
 	print(weights_node.w)
 	evaluate(graph)
 	visualize(graph, 100)
