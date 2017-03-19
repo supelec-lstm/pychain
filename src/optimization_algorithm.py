@@ -71,3 +71,28 @@ class AdaDelta(OptimizationAlgorithm):
 			node.w -= self.learning_rate * update
 			self.delta_accumulator[i] = self.gamma * self.delta_accumulator[i] + (1-self.gamma)*(update**2)
 		self.reset_accumulators()
+
+class Adam(OptimizationAlgorithm):
+	#sources : https://arxiv.org/pdf/1412.6980v8.pdf et deep learning book
+	def __init__(self, learnable_nodes, learning_rate=1e-3, beta_1=0.9, beta_2=0.999, epsilon=1e-8):
+		OptimizationAlgorithm.__init__(self, learnable_nodes)
+		self.learning_rate = learning_rate
+		self.beta_1 = beta_1
+		self.beta_2 = beta_2
+		self.epsilon = epsilon
+		self.m = [np.zeros(node.w.shape) for node in self.learnable_nodes]
+		self.v = [np.zeros(node.w.shape) for node in self.learnable_nodes]
+		self.t = 0
+
+	def optimize(self, batch_size=1):
+		for i, node in enumerate(self.learnable_nodes):
+			grad = node.acc_dJdw / batch_size
+			self.t += 1
+			self.m[i] = (self.beta_1*self.m[i]) + (1 - self.beta_1) * grad
+			self.v[i] = (self.beta_2 * self.v[i]) + (1 - self.beta_2) * (grad ** 2)
+			self.m[i] /= (1-self.beta_1**self.t)
+			self.v[i] /= (1-self.beta_2**self.t)
+			node.w -= self.learning_rate*self.m[i]/(np.sqrt(self.v[i])+self.epsilon)
+		self.m = [np.zeros(node.w.shape) for node in self.learnable_nodes]
+		self.v = [np.zeros(node.w.shape) for node in self.learnable_nodes]
+		self.reset_accumulators()
