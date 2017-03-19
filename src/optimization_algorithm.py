@@ -55,9 +55,8 @@ class AdaGrad(OptimizationAlgorithm):
 		self.reset_accumulators()
 
 class AdaDelta(OptimizationAlgorithm):
-	def __init__(self, learnable_nodes, learning_rate, gamma=0.95, epsilon=1e-6):
+	def __init__(self, learnable_nodes, gamma=0.95, epsilon=1e-6):
 		OptimizationAlgorithm.__init__(self, learnable_nodes)
-		self.learning_rate = learning_rate
 		self.gamma = gamma
 		self.epsilon = epsilon
 		self.new_accumulator = [np.zeros(node.w.shape) for node in self.learnable_nodes]
@@ -66,14 +65,14 @@ class AdaDelta(OptimizationAlgorithm):
 	def optimize(self, batch_size=1):
 		for i, node in enumerate(self.learnable_nodes):
 			grad = node.acc_dJdw/batch_size
-			self.new_accumulator[i] = self.gamma * self.new_accumulator[i] + (1-self.gamma)*(grad**2)
+			self.new_accumulator[i] = self.gamma*self.new_accumulator[i] + (1-self.gamma)*(grad**2)
 			update = grad * np.sqrt(self.delta_accumulator[i] + self.epsilon)/np.sqrt(self.new_accumulator[i] + self.epsilon)
-			node.w -= self.learning_rate * update
+			node.w -= update
 			self.delta_accumulator[i] = self.gamma * self.delta_accumulator[i] + (1-self.gamma)*(update**2)
 		self.reset_accumulators()
 
 class Adam(OptimizationAlgorithm):
-	#sources : https://arxiv.org/pdf/1412.6980v8.pdf et deep learning book
+	# References: https://arxiv.org/pdf/1412.6980v8.pdf and the Deep Learning Book
 	def __init__(self, learnable_nodes, learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-8):
 		OptimizationAlgorithm.__init__(self, learnable_nodes)
 		self.learning_rate = learning_rate
@@ -88,8 +87,8 @@ class Adam(OptimizationAlgorithm):
 		for i, node in enumerate(self.learnable_nodes):
 			grad = node.acc_dJdw / batch_size
 			self.t += 1
-			self.m[i] = (self.beta_1*self.m[i]) + (1 - self.beta_1) * grad
-			self.v[i] = (self.beta_2 * self.v[i]) + (1 - self.beta_2) * (grad ** 2)
+			self.m[i] = (self.beta_1*self.m[i]) + (1 - self.beta_1)*grad
+			self.v[i] = (self.beta_2*self.v[i]) + (1 - self.beta_2)*(grad ** 2)
 			m_corrected = self.m[i] / (1-self.beta_1**self.t)
 			v_corrected = self.v[i] / (1-self.beta_2**self.t)
 			node.w -= self.learning_rate*m_corrected/(np.sqrt(v_corrected)+self.epsilon)
