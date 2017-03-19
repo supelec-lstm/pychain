@@ -74,7 +74,7 @@ class AdaDelta(OptimizationAlgorithm):
 
 class Adam(OptimizationAlgorithm):
 	#sources : https://arxiv.org/pdf/1412.6980v8.pdf et deep learning book
-	def __init__(self, learnable_nodes, learning_rate=1e-3, beta_1=0.9, beta_2=0.999, epsilon=1e-8):
+	def __init__(self, learnable_nodes, learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-8):
 		OptimizationAlgorithm.__init__(self, learnable_nodes)
 		self.learning_rate = learning_rate
 		self.beta_1 = beta_1
@@ -90,9 +90,7 @@ class Adam(OptimizationAlgorithm):
 			self.t += 1
 			self.m[i] = (self.beta_1*self.m[i]) + (1 - self.beta_1) * grad
 			self.v[i] = (self.beta_2 * self.v[i]) + (1 - self.beta_2) * (grad ** 2)
-			self.m[i] /= (1-self.beta_1**self.t)
-			self.v[i] /= (1-self.beta_2**self.t)
-			node.w -= self.learning_rate*self.m[i]/(np.sqrt(self.v[i])+self.epsilon)
-		self.m = [np.zeros(node.w.shape) for node in self.learnable_nodes]
-		self.v = [np.zeros(node.w.shape) for node in self.learnable_nodes]
+			m_corrected = self.m[i] / (1-self.beta_1**self.t)
+			v_corrected = self.v[i] / (1-self.beta_2**self.t)
+			node.w -= self.learning_rate*m_corrected/(np.sqrt(v_corrected)+self.epsilon)
 		self.reset_accumulators()
