@@ -5,8 +5,8 @@ def boolean_function_dataset(function):
 	Y = np.array([function(x) for x in X])
 	return X, Y
 
-def unit_square_function_dataset(length, function, nb_inputs=2):
-	X = np.random.rand(length, nb_inputs)
+def real_function_dataset(length, function, nb_inputs=2, x_min=0, x_max=1):
+	X = np.random.rand(length, nb_inputs) * (x_max - x_min) + x_min
 	Y = np.array([function(x) for x in X])
 	return X, Y
 
@@ -20,10 +20,10 @@ def xor_dataset():
 	return boolean_function_dataset(lambda x: (x[0] and not x[1]) or (not x[0] and x[1]))
 
 def plane_dataset(length, normal_vector=[1, -1]):
-	return unit_square_function_dataset(length, lambda x: (np.dot(x, normal_vector) >= 0))
+	return real_function_dataset(length, lambda x: (np.dot(x, normal_vector) >= 0))
 
 def disk_dataset(length):
-	return unit_square_function_dataset(length, lambda x: ((x[0]-0.5)**2 + (x[1]-0.5)**2) <= 0.0625)
+	return real_function_dataset(length, lambda x: (x[0]**2 + x[1]**2) <= 0.25, x_min = -0.75, x_max=0.75)
 
 def augmented_dataset(X, map_function, input_length):
 	new_X = np.zeros((X.shape[0], input_length))
