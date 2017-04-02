@@ -28,8 +28,8 @@ class OptimizationAlgorithm:
 			node.reset_accumulator()
 
 class GradientDescent(OptimizationAlgorithm):
-	def __init__(self, learnable_nodes, learning_rate, decay_rate=0.95, delta=1e-6, \
-		learning_rate_decay=None, clipping=None, momentum=None):
+	def __init__(self, learnable_nodes, learning_rate, learning_rate_decay=None, clipping=None, \
+		momentum=None):
 		OptimizationAlgorithm.__init__(self, learnable_nodes, learning_rate, learning_rate_decay, clipping, momentum)
 
 	def compute_direction(self, i, grad):

@@ -1,12 +1,13 @@
 import numpy as np
 
 class Node:
-    def __init__(self, parents=None):
+    def __init__(self, parents=None, nb_outputs=1):
         # Parents for each input
         self.set_parents(parents or [])
         # Children for each output
-        self.children = []
+        self.children = [[] for _ in range(nb_outputs)]
 
+        # Memoization
         self.x = None
         self.y = None
         self.dJdx = None
@@ -16,22 +17,15 @@ class Node:
         self.gradient_dirty = True
 
     def set_parents(self, parents):
+        # Check if all parents are given as a tuple (parent, i_output)
+        parents = [(parent, 0) if type(parent) != tuple else parent for parent in parents]
+        # Reset and fill self.parents
         self.parents = []
-        for i, pair in enumerate(parents):
-            parent = None
-            i_parent_output = 0
-            # Check if an output is given
-            if type(pair) == tuple:
-                parent, i_parent_output = pair
-            # Else only a node is given
-            else:
-                parent = pair
+        for i_input, (parent, i_parent_output) in enumerate(parents):
             self.parents.append((parent, i_parent_output))
-            parent.add_child(self, i, i_parent_output)
+            parent.add_child(self, i_input, i_parent_output)
         
     def add_child(self, child, i_child_input, i_output):
-        if(i_output >= len(self.children)):
-            self.children += [[] for _ in range(i_output - len(self.children) + 1)]
         self.children[i_output].append((child, i_child_input))
 
     def reset_memoization(self):

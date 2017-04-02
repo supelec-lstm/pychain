@@ -2,7 +2,7 @@ from node import *
 
 class CompositeNode(LearnableNode):
     def __init__(self, nodes, input_nodes, output_nodes, learnable_nodes, parents=None):
-        Node.__init__(self, parents)
+        Node.__init__(self, parents, len(output_nodes))
         self.nodes = nodes
         self.input_nodes = input_nodes
         self.output_nodes = output_nodes

@@ -23,7 +23,7 @@ class Graph:
 			node.set_value(y)
 		cost = self.cost_node.get_output()
 		for node in self.learnable_nodes:
-			node.get_gradient(0)
+			node.get_gradient()
 		return cost
 
 	def reset_memoization(self):
