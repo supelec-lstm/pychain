@@ -30,10 +30,35 @@ class RecurrentGraph:
 		# Propagate
 		outputs = []
 		cur_input = x
+		i=0
 		for layer in self.layers:
 			output, H = layer.get_output([cur_input], H)
 			cur_input = fselect(output[0])
+			if i==500:
+				print(cur_input)
+			i += 1
 			outputs.append(cur_input)
+		return outputs
+
+	def generateFromSequence(self, fselect, sequence, H=None):
+		# Reset memoization
+		self.reset_memoization()
+		# Init H
+		if H is None:
+			H = [np.zeros(shape) for shape in self.hidden_shapes]
+		# Propagate
+		outputs = []
+		cur_input = sequence[0]
+		index = 0
+		for layer in self.layers:
+			if index < len(sequence)-1:
+				output, H = layer.get_output([cur_input], H)
+				index += 1
+				cur_input = sequence[index]
+			else:
+				output, H = layer.get_output([cur_input], H)
+				cur_input = fselect(output[0])
+				outputs.append(cur_input)
 		return outputs
 
 	def backpropagate(self, expected_sequence, dJdH=None):
