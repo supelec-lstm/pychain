@@ -34,6 +34,8 @@ class RecurrentGraph:
 		for layer in self.layers:
 			output, H = layer.get_output([cur_input], H)
 			cur_input = fselect(output[0])
+			if i==500:
+				print(cur_input)
 			i += 1
 			outputs.append(cur_input)
 		return outputs
