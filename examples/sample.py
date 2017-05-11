@@ -48,13 +48,10 @@ def sequence_to_string(sequence):
 def sample(graph):
     for letter in letters[0]:
         x = letter_to_vector(letter)
-        print(x)
         result = graph.generate(stochastic, x)
-        print(result)
         print(letter + sequence_to_string(result))
-        #print(letter + sample_sequence_to_string(result))
 
 if __name__ == '__main__':
-    layer = pickle.load(open('models/2017-03-16 12:21:47.306130_b:20001.pickle', 'rb'))
+    layer = pickle.load(open('models/2017-03-19 14:11:32.218324_b:9000.pickle', 'rb'))
     graph = RecurrentGraph(layer, len_seq - 1, hidden_shapes)
     sample(graph)

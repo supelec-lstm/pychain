@@ -25,12 +25,15 @@ print('Vocab size:' + str(len(letters)))
 letter_to_index = {letter: i for i, letter in enumerate(letters)}
 index_to_letter = {i: letter for i, letter in enumerate(letters)}
 
-num_lstms = 1
+num_lstms = 2
 dim_s = 128
 learning_rate = 2e-3
 len_seq = 50
 nb_seq_per_batch = 50
 hidden_shapes = [(nb_seq_per_batch, dim_s), (nb_seq_per_batch, dim_s)] * num_lstms
+
+# Cut text in sequences
+text = [text[i:i+len_seq] for i in range(0, len(text), len_seq)]
 
 def string_to_sequences(string, nb_seq=1, len_seq=None):
     len_seq = len_seq or int(len(string) / nb_seq)
@@ -45,17 +48,18 @@ def learn_shakespeare(layer):
     graph = RecurrentGraph(layer, len_seq - 1, hidden_shapes)
     # Optimization algorithm
     #algo = GradientDescent(graph.get_learnable_nodes(), learning_rate)
-    algo = RMSProp(graph.get_learnable_nodes(), learning_rate, 0.95)
+    algo = RMSProp(graph.get_learnable_nodes(), learning_rate)
     # Learn
     i_pass = 1
     i_batch = 1
+    nb_batches = int(len(text) / nb_seq_per_batch)
     while True:
-        len_batch = len_seq*nb_seq_per_batch
-        nb_batches = int(len(text) / len_batch)
-        for i in range(nb_batches):
+        # Shuffle sequences
+        np.random.shuffle(text)
+        for i in range(0, len(text), nb_seq_per_batch):
             t_start = time.time()
             # Take a new batch
-            string = text[i*len_batch:(i+1)*len_batch]
+            string = ''.join(text[i:i+nb_seq_per_batch])
             sequences = string_to_sequences(string, nb_seq_per_batch)
             # Propagate and backpropagate the batch
             graph.propagate(sequences[:-1])
@@ -70,7 +74,7 @@ def learn_shakespeare(layer):
             # Desend gradient
             algo.optimize(nb_seq_per_batch)
             # Print info
-            print('pass: ' + str(i_pass) + ', batch: ' + str(i+1) + '/' + str(nb_batches) + \
+            print('pass: ' + str(i_pass) + ', batch: ' + str((i_batch-1)%nb_batches+1) + '/' + str(nb_batches) + \
                 ', cost: ' + str(cost) + ', time: ' + str(time.time() - t_start)  + \
                 ', grad/param norm: ' + str(np.sqrt(grad_norm/param_norm)))
             # Save
@@ -121,4 +125,8 @@ def save_layer(layer, i_batch):
 
 if __name__ == '__main__':
     layer = create_layer()
+    nb_weights = 0
+    for node in layer.get_learnable_nodes():
+        nb_weights += node.w.shape[0]*node.w.shape[1]
+    print('number of parameters in the model:', nb_weights)
     learn_shakespeare(layer)
