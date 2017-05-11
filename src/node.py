@@ -44,6 +44,9 @@ class Node:
         raise NotImplementedError()
 
     def get_gradient(self, i_input=0):
+        # If there are no children, return zero
+        if np.sum(len(children) for children in self.children) == 0:
+            return np.zeros(self.x[i_input].shape)
         # Get gradient with respect to the i_inputth input
         if self.gradient_dirty:
             self.dJdy = [np.sum(child.get_gradient(i) for child, i in children) for children in self.children]
@@ -225,13 +228,6 @@ class EWMultiplicationNode(Node):
     def compute_gradient(self):
         return [self.dJdy[0]*self.x[1], self.dJdy[0]*self.x[0]]
 
-class  ConcatenationNode(Node):
-    def compute_output(self):
-        return [np.concatenate((self.x[0], self.x[1]), axis=1)]
-
-    def compute_gradient(self):
-        return [self.dJdy[0][:,:self.x[0].shape[1]], self.dJdy[0][:,self.x[0].shape[1]:]]
-
 class SoftmaxCrossEntropyNode(Node):
     def compute_output(self):
         return [-np.sum(self.x[0]*np.log(self.x[1]))]
@@ -253,3 +249,15 @@ class SumNode(Node):
 
     def compute_gradient(self):
         return [self.dJdy[0] for _ in self.parents]
+
+class  ConcatenationNode(Node):
+    def compute_output(self):
+        return [np.concatenate(self.x, axis=1)]
+
+    def compute_gradient(self):
+        result = []
+        offset = 0
+        for i in range(len(self.x)):
+            result.append(self.dJdy[0][:,offset:offset+self.x[i].shape[1]])
+            offset += self.x[i].shape[1]
+        return result
